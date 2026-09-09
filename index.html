@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>皇輿爭霸 · 新手版</title>
+<title>皇輿爭霸 · 王國牌組合版</title>
 <style>
 /* ==================== 主題變數 ==================== */
 :root{
@@ -20,7 +20,7 @@
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
 body{
-  margin:0; overflow-x:hidden; overflow-y:auto;
+  margin:0; overflow:hidden;
   font-family:"Noto Serif TC","Songti TC","Source Han Serif TC",
               "PingFang TC","Microsoft JhengHei",Georgia,serif;
   color:var(--parch-1);
@@ -41,16 +41,15 @@ body::after{ /* 桌面暗角 */
 
 /* ==================== 版面骨架 ==================== */
 #table{
-  position:relative; min-height:100vh; display:grid; gap:6px; padding:6px;
-  grid-template-columns:196px minmax(0,1fr) 196px;
-  grid-template-rows:auto auto auto;
+  position:fixed; inset:0; display:grid; gap:6px; padding:6px;
+  grid-template-columns:196px minmax(0,1fr) 196px 212px;
+  grid-template-rows:auto minmax(0,1fr) auto;
   grid-template-areas:
-    "title seatN  info"
-    "seatW center seatE"
-    "seatS seatS  seatS";
+    "title seatN  info   log"
+    "seatW center seatE  log"
+    "seatS seatS  seatS  log";
 }
-#logPanel{display:none!important}
-#openLogBtn{display:none!important}
+#logPanel{grid-area:log; min-height:0}
 #infoPanel{grid-area:info}
 #titlePanel{grid-area:title}
 #seatN{grid-area:seatN; justify-self:center; width:100%}
@@ -92,7 +91,7 @@ body::after{ /* 桌面暗角 */
 .ttl::before,.ttl::after{content:""; flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold-d),transparent)}
 
 /* ==================== 記錄面板 ==================== */
-#logPanel{display:none!important}
+#logPanel{display:flex; flex-direction:column; padding:8px 8px 6px; min-height:0}
 #logList{
   flex:1; overflow-y:auto; margin-top:6px; font-size:11.5px; line-height:1.55;
   padding-right:4px; min-height:0;
@@ -115,6 +114,21 @@ body::after{ /* 桌面暗角 */
 
 /* ==================== 狀態面板 ==================== */
 #infoPanel{display:flex; flex-direction:column; padding:6px 7px; gap:5px}
+#aiSpeedControl{
+  padding:5px 7px 4px; border-radius:6px;
+  background:linear-gradient(160deg,rgba(255,255,255,.46),rgba(216,192,138,.42));
+  border:1px solid rgba(141,106,29,.48);
+}
+#aiSpeedControl .speedHead{
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:9.5px;font-weight:800;letter-spacing:1px;color:var(--ink-2);
+}
+#aiSpeedVal{font-size:11px;color:var(--red);letter-spacing:.5px}
+#aiSpeedControl .speedRange{display:flex;align-items:center;gap:5px;margin-top:2px}
+#aiSpeedControl .speedRange span{font-size:8px;color:var(--ink-2);font-weight:700}
+#aiSpeed{
+  width:100%;height:5px;margin:0;cursor:pointer;accent-color:var(--red);
+}
 #phaseList{display:flex; flex-direction:row; gap:3px}
 .phaseItem{
   flex:1; justify-content:center;
@@ -145,9 +159,6 @@ body::after{ /* 桌面暗角 */
   padding-top:4px;
 }
 #curTurnBox b{font-size:12px;color:var(--ink)}
-#aiSpeedControl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:12px;flex:1 1 100%;min-width:0}
-#aiSpeedControl output{margin-left:auto;font-weight:700;white-space:nowrap}
-#aiSpeed{width:100%;min-width:0;margin:0;accent-color:var(--gold-d)}
 #fxTicker{
   border-radius:6px; padding:4px 6px; font-size:10.5px; line-height:1.35; max-height:46px;
   background:rgba(74,35,82,.12); border:1px dashed rgba(141,106,29,.45); color:var(--ink);
@@ -157,7 +168,7 @@ body::after{ /* 桌面暗角 */
 
 /* ==================== 中央供應區 ==================== */
 #center{
-  display:flex; flex-direction:column; gap:6px; overflow:visible; padding:4px 2px;
+  display:flex; flex-direction:column; gap:6px; overflow:auto; padding:4px 2px;
 }
 .supplyBlock{
   border-radius:10px; padding:5px 8px 7px;
@@ -362,7 +373,6 @@ body::after{ /* 桌面暗角 */
 
 /* ==================== 玩家 1（下方） ==================== */
 #seatS{display:flex;flex-direction:column;gap:5px;padding:5px 9px 7px}
-#seatS{min-height:0;overflow:visible}
 #seatS.active::after{display:none}
 #seatS .zoneCards{min-height:0}
 #seatS .zone{min-height:0}
@@ -371,12 +381,11 @@ body::after{ /* 桌面暗角 */
 #seatS .sMid{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:5px}
 #seatS .sRight{flex:0 0 auto;width:172px;display:flex;flex-direction:column;gap:5px}
 #handZone{
-  border-radius:7px;padding:4px 6px 5px;min-height:116px;overflow:hidden;
+  border-radius:7px;padding:4px 6px 5px;min-height:92px;
   background:linear-gradient(180deg,rgba(90,60,25,.2),rgba(90,60,25,.08));
   border:1px solid rgba(141,106,29,.5);
 }
-#handCards{display:flex;gap:5px;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;overflow-x:auto;overflow-y:hidden;padding-bottom:3px}
-.card.hand{width:78px;flex:0 0 78px}.card.hand .cd-art{height:26px}.card.hand .cd-name{font-size:10px}.card.hand .cd-text{font-size:7.6px;line-height:1.18}.card.hand .cd-type{font-size:8px;padding:1px 0}
+#handCards{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
 .btn{
   padding:8px 10px; border-radius:7px; font-family:inherit; font-weight:800; font-size:12.5px;
   letter-spacing:1px; cursor:pointer; color:#f8ecd0; border:1px solid #2a1c0a;
@@ -411,14 +420,50 @@ body::after{ /* 桌面暗角 */
 
 /* ==================== 特效 ==================== */
 #fxLayer{position:fixed;inset:0;z-index:70;pointer-events:none;overflow:hidden}
-.purchaseFx{position:fixed;left:50%;top:44%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:8px;max-width:90vw;filter:drop-shadow(0 6px 14px rgba(0,0,0,.6))}
-.purchaseFx .purchaseCaption{padding:8px 14px;border:1px solid var(--gold);border-radius:8px;background:#332311;color:#fff0c9;font-size:16px;text-align:center}
-.purchaseFx .card{width:150px!important;max-height:none!important;height:auto!important;min-height:185px}
-.purchaseFx .card .cd-art{height:58px!important}
-.purchaseFx .card .cd-name{font-size:16px!important}
-.purchaseFx .card .cd-text{font-size:13px!important;line-height:1.45!important}
-.purchaseFx .card .cd-type{font-size:11px!important}
-.purchaseFx .card .cd-en{display:none}
+.purchaseFx{
+  position:fixed; left:50%; top:50%; z-index:12;
+  display:flex; flex-direction:column; align-items:center; gap:7px;
+  transform:translate(-50%,-50%);
+  filter:drop-shadow(0 18px 24px rgba(0,0,0,.72));
+  animation:purchaseReveal .22s cubic-bezier(.2,.8,.2,1) both;
+  will-change:transform,opacity;
+}
+.purchaseFx::before{
+  content:""; position:absolute; inset:-38px -70px; z-index:-1; border-radius:50%;
+  background:radial-gradient(circle,rgba(244,221,147,.42),rgba(217,182,76,.14) 42%,transparent 72%);
+  animation:purchaseHalo .8s ease-in-out infinite alternate;
+}
+.purchaseFx .buyFxBuyer{
+  min-width:150px; padding:6px 14px; border-radius:18px; text-align:center;
+  color:#fff4d0; font-size:13px; font-weight:900; letter-spacing:2px;
+  background:linear-gradient(135deg,rgba(78,48,15,.94),rgba(126,20,32,.94));
+  border:1px solid var(--gold-l); box-shadow:0 3px 12px rgba(0,0,0,.55);
+}
+.purchaseFx .card.buyFxCard{
+  width:142px; min-height:184px; border-width:3px;
+  box-shadow:0 12px 34px rgba(0,0,0,.72),0 0 0 3px rgba(244,221,147,.55),0 0 28px rgba(217,182,76,.7);
+}
+.purchaseFx .card.buyFxCard .cd-art{height:54px;margin:7px 7px 0}
+.purchaseFx .card.buyFxCard .cd-name{font-size:17px;margin-top:5px}
+.purchaseFx .card.buyFxCard .cd-en{font-size:9px}
+.purchaseFx .card.buyFxCard .cd-text{font-size:11px;line-height:1.4;margin:4px 8px}
+.purchaseFx .card.buyFxCard .cd-type{font-size:10px;padding:2px 0 3px}
+.purchaseFx .card.buyFxCard .cd-cost{width:29px;height:29px;font-size:14px}
+.purchaseFx .buyFxStamp{
+  padding:4px 13px; border-radius:6px; color:#2b1a06; font-size:15px; font-weight:900;
+  letter-spacing:5px; background:linear-gradient(160deg,var(--gold-l),var(--gold));
+  border:2px solid #71520f; box-shadow:0 3px 0 #4b3305,0 5px 12px rgba(0,0,0,.5);
+}
+.pileItem.receiveCard{animation:receiveCardPulse .7s ease-out}
+@keyframes purchaseReveal{
+  from{opacity:0;transform:translate(-50%,-44%) scale(.72) rotate(-3deg)}
+  to{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}
+}
+@keyframes purchaseHalo{from{transform:scale(.9);opacity:.55}to{transform:scale(1.08);opacity:1}}
+@keyframes receiveCardPulse{
+  0%{filter:brightness(1)}35%{filter:brightness(1.7) drop-shadow(0 0 12px var(--gold-l));transform:scale(1.12)}
+  100%{filter:brightness(1);transform:scale(1)}
+}
 .attackFx{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   background:radial-gradient(ellipse at 50% 50%,rgba(179,34,50,.5),rgba(80,4,12,.72) 70%);
   animation:atkBg 1.5s ease-out forwards}
@@ -513,6 +558,64 @@ body::after{ /* 桌面暗角 */
   border-top:1px dashed rgba(141,106,29,.55);padding-top:9px}
 #startBtn{margin-top:14px;font-size:16px;padding:12px}
 
+/* ---- 牌組模組挑選 ---- */
+#setPreview{
+  font-size:11px; color:var(--ink-2); margin-top:6px; line-height:1.7;
+  background:rgba(255,255,255,.34); border:1px dashed rgba(141,106,29,.5);
+  border-radius:7px; padding:6px 8px;
+}
+#setPreview b{color:var(--ink); font-weight:800}
+.favChip{padding-right:26px!important}
+.favChip .del{
+  position:absolute; right:4px; top:50%; transform:translateY(-50%);
+  font-size:11px; color:#8a2131; font-weight:900; padding:1px 4px; border-radius:4px; line-height:1;
+}
+.favChip .del:hover{background:rgba(179,34,50,.25)}
+.chip{position:relative}
+#customPanel{
+  display:none; margin-top:8px; padding:8px; border-radius:9px;
+  border:1px solid rgba(141,106,29,.5); background:rgba(255,255,255,.26);
+}
+.cpHead{display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:7px}
+.cpHead .cpInfo{font-size:12px; font-weight:800; color:var(--ink)}
+.cpHead .cpInfo b{font-size:15px; color:#7d5c0c}
+.cpHead input{
+  flex:1 1 120px; min-width:110px; padding:6px 8px; border-radius:6px;
+  border:1.5px solid rgba(141,106,29,.55); background:rgba(255,255,255,.62);
+  font-family:inherit; font-size:12px; font-weight:700; color:var(--ink);
+}
+.cpHead input:focus{outline:2px solid var(--gold)}
+.cpHead .btn{width:auto; padding:6px 10px; font-size:11.5px}
+#cpGrid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(112px,1fr)); gap:5px;
+  max-height:236px; overflow-y:auto; padding-right:4px;
+}
+.cpItem{
+  display:flex; align-items:center; gap:5px; padding:4px 6px; border-radius:6px; cursor:pointer;
+  background:rgba(255,255,255,.42); border:1.5px solid rgba(141,106,29,.4); transition:.13s;
+}
+.cpItem:hover{background:rgba(255,255,255,.72)}
+.cpItem.on{
+  background:linear-gradient(160deg,var(--gold-l),var(--gold)); border-color:#5b4109;
+  box-shadow:0 0 10px rgba(217,182,76,.6);
+}
+.cpItem .cpArt{
+  width:28px; height:19px; border-radius:3px; overflow:hidden; flex:0 0 auto;
+  border:1px solid rgba(0,0,0,.32);
+}
+.cpItem .cpArt svg{width:100%; height:100%; display:block}
+.cpItem .cpN{font-size:11.5px; font-weight:800; color:var(--ink); line-height:1.15; flex:1; min-width:0}
+.cpItem .cpC{
+  font-size:10px; font-weight:900; color:#7d5c0c; background:rgba(255,255,255,.75);
+  border:1px solid rgba(141,106,29,.45); border-radius:8px; padding:0 5px; flex:0 0 auto;
+}
+#startMsg{
+  display:none; margin-top:9px; padding:6px 10px; border-radius:7px; font-size:12px; font-weight:800;
+  color:#fff; background:linear-gradient(160deg,var(--red-l),var(--red)); border:1px solid var(--red-d);
+  text-align:center;
+}
+#startMsg.on{display:block; animation:popIn .2s}
+
 #endBox .scoreRow{
   display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;margin-bottom:6px;
   background:rgba(255,255,255,.38);border:1px solid rgba(141,106,29,.4);
@@ -537,7 +640,7 @@ body::after{ /* 桌面暗角 */
 
 /* ==================== 響應式：平板 ==================== */
 @media (max-width:1320px){
-  #table{grid-template-columns:172px minmax(0,1fr) 172px}
+  #table{grid-template-columns:172px minmax(0,1fr) 172px 190px}
   .seat.side{width:172px}
   .card{width:94px}
   .card .cd-art{height:40px}
@@ -548,7 +651,7 @@ body::after{ /* 桌面暗角 */
   .seat.top{grid-template-columns:180px minmax(0,1fr) 138px}
 }
 @media (max-width:1060px){
-  #table{grid-template-columns:150px minmax(0,1fr) 150px; gap:5px; padding:5px}
+  #table{grid-template-columns:150px minmax(0,1fr) 150px 168px; gap:5px; padding:5px}
   .seat.side{width:150px}
   .card{width:86px}
   .card .cd-text{font-size:8.2px}
@@ -585,7 +688,7 @@ body::after{ /* 桌面暗角 */
   .card .cd-type{font-size:8px;padding:1px 0}
   .card .cd-cost{width:19px;height:19px;font-size:10px}
   .card .cd-count{min-width:19px;height:19px;font-size:10px}
-  .card.hand{width:78px}
+  .card.hand{width:84px}
   .card.hand .cd-art{height:28px}
   .seat .stat{padding:2px 2px 3px}
   .seat .stat .sv,#seatS .statRow .sv{font-size:12.5px}
@@ -612,6 +715,7 @@ body::after{ /* 桌面暗角 */
 }
 @media (min-width:821px) and (max-height:830px){
   #center{gap:3px;padding:1px 2px}
+  .card .cd-text{font-size:7.8px;line-height:1.2}
   .supplyBlock{padding:3px 7px 4px}
   .card .cd-art{height:26px}
   .card .cd-en{display:none}
@@ -746,14 +850,14 @@ body::after{ /* 桌面暗角 */
   <!-- 徽記 / 牌堆狀態 -->
   <div id="titlePanel" class="panel">
     <div class="crest">皇輿爭霸</div>
-    <div class="crestSub">DOMINION · 新手版</div>
+    <div class="crestSub">DOMINION</div>
     <div class="miniStat">
       <div><div class="msv" id="msProv">12</div><div class="msl">行省剩餘</div></div>
       <div><div class="msv" id="msEmpty">0</div><div class="msl">售罄堆數</div></div>
     </div>
     <div class="miniStat">
       <div><div class="msv" id="msTrash">0</div><div class="msl">廢除區</div></div>
-      <div><div class="msv" id="msActions">0</div><div class="msl">剩餘行動</div></div>
+      <div><div class="msv" id="msRound">1</div><div class="msl">總回合</div></div>
     </div>
   </div>
 
@@ -766,6 +870,10 @@ body::after{ /* 桌面暗角 */
 
   <!-- 階段與資源 -->
   <div id="infoPanel" class="panel">
+    <div id="aiSpeedControl">
+      <div class="speedHead"><span>AI 反應時間</span><b id="aiSpeedVal">1.5 秒</b></div>
+      <div class="speedRange"><span>0.5</span><input id="aiSpeed" type="range" min="0.5" max="2" step="0.1" value="1.5" aria-label="AI 反應時間"><span>2.0</span></div>
+    </div>
     <div id="phaseList">
       <div class="phaseItem" data-ph="action"><span class="dot"></span>行動階段</div>
       <div class="phaseItem" data-ph="buy"><span class="dot"></span>購買階段</div>
@@ -776,8 +884,7 @@ body::after{ /* 桌面暗角 */
       <div class="res"><div class="rv" id="resBuy">1</div><div class="rl">購買</div></div>
       <div class="res coin"><div class="rv" id="resCoin">$0</div><div class="rl">金錢</div></div>
     </div>
-    <div id="curTurnBox">目前玩家：<b id="curName">—</b></div>
-    <label id="aiSpeedControl" for="aiSpeed"><span>AI 反應速度</span><output id="aiSpeedValue" for="aiSpeed">1.5 秒</output><input id="aiSpeed" type="range" min="0.5" max="2" step="0.1" value="1.5" aria-valuetext="1.5 秒"></label>
+    <div id="curTurnBox">目前玩家：<b id="curName">—</b>　第 <b id="curTurn">0</b> 回合</div>
     <div id="fxTicker"><span class="fxT">本回合特效：</span>—</div>
   </div>
 
@@ -791,7 +898,7 @@ body::after{ /* 桌面暗角 */
   <!-- 中央供應區 -->
   <div id="center">
     <div class="supplyBlock">
-      <div class="blockTtl">新手王國牌組 · 十種共 100 張</div>
+      <div class="blockTtl" id="kingdomTtl">王國牌組 · 十種共 100 張</div>
       <div id="kingdomGrid"></div>
     </div>
     <div class="supplyBlock">
@@ -864,7 +971,7 @@ body::after{ /* 桌面暗角 */
 <div id="startWrap">
   <div id="startBox" class="panel">
     <h1>皇輿爭霸</h1>
-    <div class="sub">DOMINION · 新手版</div>
+    <div class="sub">DOMINION · 25 張王國牌 · 6 種模組</div>
 
     <div class="fieldTtl">玩家人數</div>
     <div class="chips" id="cntChips">
@@ -885,12 +992,29 @@ body::after{ /* 桌面暗角 */
       <div class="chip" data-v="rand">隨機決定</div>
     </div>
 
+    <div class="fieldTtl">牌組模組</div>
+    <div class="chips" id="setChips"></div>
+    <div id="setPreview"></div>
+
+    <div id="customPanel">
+      <div class="cpHead">
+        <span class="cpInfo">已選 <b id="cpCount">0</b> / 10</span>
+        <input id="cpName" maxlength="10" placeholder="我的最愛名稱">
+        <button class="btn" id="cpSave">★ 收藏</button>
+        <button class="btn" id="cpRandom">🎲 隨機十張</button>
+        <button class="btn" id="cpClear">清空</button>
+      </div>
+      <div id="cpGrid"></div>
+    </div>
+
+    <div id="startMsg"></div>
     <button class="btn primary" id="startBtn">⚜　開　局　⚜</button>
 
     <div class="rules">
       <b>玩法：</b>每回合抽 5 張牌，依序經過「行動 → 購買 → 清理」三階段。行動階段可打出行動牌（預設 1 行動）；
       進入購買階段時手上金錢牌會<b>自動打出並結算金錢</b>；清理階段將手牌與出牌區全部棄掉並重抽 5 張。<br>
-      <b>結束條件：</b>行省牌堆售罄，或任意三堆牌售罄。<b>計分：</b>莊園 1 分、公國 3 分、行省 6 分、詛咒 −1 分。
+      <b>結束條件：</b>行省牌堆售罄，或任意三堆牌售罄。<b>計分：</b>莊園 1 分、公國 3 分、行省 6 分、詛咒 −1 分、
+      花園每滿 10 張牌得 1 分。<b>詛咒</b>不能購買，只會由女巫等卡牌塞給你。
     </div>
   </div>
 </div>
@@ -898,7 +1022,7 @@ body::after{ /* 桌面暗角 */
 <script>
 "use strict";
 /* =====================================================================
-   皇輿爭霸 · 新手版   —— 卡牌資料與插圖
+   皇輿爭霸 · 卡牌資料與插圖（王國牌 25 種 + 基礎牌 7 種）
    ===================================================================== */
 
 /* ---------- 手繪 SVG 插圖（單一檔案離線可用） ---------- */
@@ -973,6 +1097,7 @@ const ART = {
   <path d="M16 14 q6 8 0 16 M84 14 q-6 8 0 16" stroke="#a86fb8" stroke-width="2" fill="none" opacity=".8"/>
   <circle cx="20" cy="40" r="2.4" fill="#c58bd4" opacity=".8"/><circle cx="80" cy="42" r="2" fill="#c58bd4" opacity=".7"/></svg>`,
 
+  /* ---------- 王國牌 ---------- */
   cellar:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#3b2c1c"/>
   <path d="M18 52 V26 a32 22 0 0 1 64 0 v26z" fill="#5b4630"/>
   <path d="M26 52 V28 a24 17 0 0 1 48 0 v24z" fill="#20160d"/>
@@ -983,44 +1108,19 @@ const ART = {
   <path d="M6 52 l8-8 h10 l-8 8z" fill="#6b543a"/><path d="M78 52 l8-8 h10 l-8 8z" fill="#6b543a"/>
   <circle cx="14" cy="20" r="3.5" fill="#ffd98a" opacity=".85"/><circle cx="14" cy="20" r="7" fill="#ffd98a" opacity=".22"/></svg>`,
 
-  market:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#cfa76a"/>
-  <rect x="0" y="40" width="100" height="16" fill="#8a6a42"/>
-  <path d="M8 20 h84 v10 H8z" fill="#f1e3c4"/>
-  <path d="M8 20 h84 l-4 -8 H12z" fill="#7e1420"/>
-  <path d="M20 20 l3 10 M34 20 l3 10 M48 20 l3 10 M62 20 l3 10 M76 20 l3 10" stroke="#f1e3c4" stroke-width="0"/>
-  <path d="M8 30 q7 8 14 0 q7 8 14 0 q7 8 14 0 q7 8 14 0 q7 8 14 0 q7 8 14 0 V30z" fill="#7e1420"/>
-  <rect x="14" y="20" width="6" height="10" fill="#f1e3c4"/><rect x="34" y="20" width="6" height="10" fill="#f1e3c4"/>
-  <rect x="54" y="20" width="6" height="10" fill="#f1e3c4"/><rect x="74" y="20" width="6" height="10" fill="#f1e3c4"/>
-  <rect x="12" y="8" width="4" height="34" fill="#6b4a25"/><rect x="84" y="8" width="4" height="34" fill="#6b4a25"/>
-  <rect x="18" y="36" width="64" height="6" fill="#a97a44" stroke="#5f4120" stroke-width="1"/>
-  <circle cx="32" cy="34" r="4" fill="#e8c15c" stroke="#8a6a12" stroke-width="1"/>
-  <circle cx="41" cy="34" r="4" fill="#e8c15c" stroke="#8a6a12" stroke-width="1"/>
-  <circle cx="60" cy="34" r="3.4" fill="#c85a45"/><circle cx="68" cy="34" r="3.4" fill="#5b9c5e"/></svg>`,
-
-  militia:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><defs><radialGradient id="mlbg" cx="50%" cy="45%"><stop offset="0" stop-color="#9c2130"/><stop offset="1" stop-color="#3d0810"/></radialGradient></defs>
-  <rect width="100" height="56" fill="url(#mlbg)"/>
-  <path d="M16 48 L52 6" stroke="#8a6a3a" stroke-width="4"/><path d="M52 6 l7 3-4 7z" fill="#dfe6ee"/>
-  <path d="M84 48 L48 6" stroke="#8a6a3a" stroke-width="4"/><path d="M48 6 l-7 3 4 7z" fill="#dfe6ee"/>
-  <path d="M50 16 c-12 0-19 8-19 18 v6 h38 v-6 c0-10-7-18-19-18z" fill="#b9c3cd" stroke="#5d6774" stroke-width="1.6"/>
-  <path d="M31 34 h38 v5 H31z" fill="#8b98a6"/>
-  <path d="M46 22 h8 v18 h-8z" fill="#3b4450"/>
-  <path d="M34 26 h10 v6 h-10z M56 26 h10 v6 h-10z" fill="#2b323b"/>
-  <path d="M50 6 v10" stroke="#7e1420" stroke-width="0"/>
-  <path d="M42 12 q8 -8 16 0 q-8 4 -16 0z" fill="#d9b64c"/>
-  <path d="M22 46 h56 v4 H22z" fill="#5d2a16"/></svg>`,
-
-  mine:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#2e2519"/>
-  <path d="M0 56 L14 26 H86 L100 56z" fill="#4a3d28"/>
-  <path d="M22 56 L32 34 h36 l10 22z" fill="#241c11"/>
-  <path d="M30 40 l40 0" stroke="#4a3d28" stroke-width="0"/>
-  <path d="M18 18 q14 -10 30 -2" stroke="#a7885a" stroke-width="4" fill="none"/>
-  <path d="M48 16 L36 40" stroke="#7a5a30" stroke-width="4"/>
-  <path d="M46 12 q10 -6 18 4" stroke="#c9c3bb" stroke-width="0" fill="none"/>
-  <path d="M14 14 q18 -12 36 2 l-4 5 q-14 -11 -28 -2z" fill="#cfd6dd" stroke="#7d8894" stroke-width="1.2"/>
-  <path d="M56 44 l5-9 5 9-5 5z" fill="#57d1c8" stroke="#1f7a72" stroke-width="1"/>
-  <path d="M70 46 l4-7 4 7-4 4z" fill="#e0596d" stroke="#8a2131" stroke-width="1"/>
-  <path d="M44 48 l3.5-6 3.5 6-3.5 3.5z" fill="#e8c15c" stroke="#8a6a12" stroke-width="1"/>
-  <circle cx="86" cy="14" r="4" fill="#ffd98a" opacity=".8"/><circle cx="86" cy="14" r="9" fill="#ffd98a" opacity=".18"/></svg>`,
+  chapel:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><defs><linearGradient id="chsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a5f86"/><stop offset="1" stop-color="#a9b8cf"/></linearGradient></defs>
+  <rect width="100" height="56" fill="url(#chsky)"/>
+  <path d="M0 48 h100 v8 H0z" fill="#5d6b52"/>
+  <rect x="30" y="22" width="40" height="26" fill="#e8dcc0" stroke="#6c5a3a" stroke-width="1.4"/>
+  <path d="M26 23 L50 6 L74 23z" fill="#8d5f45" stroke="#4f3222" stroke-width="1.4"/>
+  <path d="M50 0 v9 M46 4 h8" stroke="#f4dd93" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M44 34 h12 v14 h-12z" fill="#5d4423"/><path d="M44 34 a6 6 0 0 1 12 0" fill="#5d4423"/>
+  <circle cx="50" cy="17" r="4.5" fill="#ffe9a8" stroke="#6c5a3a" stroke-width="1"/>
+  <path d="M50 13 v9 M46 17 h8" stroke="#6c5a3a" stroke-width="1.2"/>
+  <rect x="33" y="28" width="6" height="10" rx="3" fill="#7fa8d8" stroke="#6c5a3a" stroke-width="1"/>
+  <rect x="61" y="28" width="6" height="10" rx="3" fill="#7fa8d8" stroke="#6c5a3a" stroke-width="1"/>
+  <path d="M12 48 q4 -14 9 -15 q5 1 9 15z" fill="#3c6b45"/>
+  <path d="M76 48 q4 -12 8 -13 q4 1 8 13z" fill="#3c6b45"/></svg>`,
 
   moat:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#b6d3e6"/>
   <ellipse cx="50" cy="40" rx="46" ry="14" fill="#2f7bbd"/><ellipse cx="50" cy="39" rx="38" ry="10.5" fill="#57a8e0"/>
@@ -1034,28 +1134,15 @@ const ART = {
   <rect x="65" y="20" width="9" height="16" fill="#d3c7a8" stroke="#6c5a3a" stroke-width="1.2"/>
   <path d="M50 6 v8" stroke="#6c5a3a" stroke-width="1.2"/><path d="M50 6 l9 3-9 3z" fill="#163f68"/></svg>`,
 
-  remodel:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#5b4a33"/>
-  <rect x="6" y="20" width="24" height="20" rx="2" fill="#8a6a42" stroke="#3d2c17" stroke-width="1.4"/>
-  <path d="M6 30 h24 M18 20 v20" stroke="#3d2c17" stroke-width="1.2"/>
-  <path d="M40 30 h16" stroke="#f4dd93" stroke-width="4"/><path d="M56 24 l10 6-10 6z" fill="#f4dd93"/>
-  <rect x="70" y="16" width="24" height="28" rx="2" fill="#e8dcc0" stroke="#6c5a3a" stroke-width="1.4"/>
-  <path d="M70 16 h4v-4h4v4h4v-4h4v4h4v-4h4v4" fill="none" stroke="#6c5a3a" stroke-width="2"/>
-  <rect x="78" y="30" width="8" height="14" fill="#6c5a3a"/>
-  <path d="M30 48 l14-14" stroke="#7a5a30" stroke-width="4"/>
-  <path d="M40 28 l10 -8 8 8 -10 8z" fill="#b9c3cd" stroke="#5d6774" stroke-width="1.2" opacity=".9"/>
-  <circle cx="34" cy="12" r="2.6" fill="#f4dd93" opacity=".8"/><circle cx="62" cy="48" r="2.2" fill="#f4dd93" opacity=".6"/></svg>`,
-
-  smithy:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><defs><radialGradient id="fg" cx="24%" cy="60%"><stop offset="0" stop-color="#ffb347"/><stop offset="1" stop-color="#3a2412"/></radialGradient></defs>
-  <rect width="100" height="56" fill="url(#fg)"/>
-  <path d="M0 48 h100 v8 H0z" fill="#2a1c0e"/>
-  <path d="M26 44 h44 v4 H26z" fill="#4a3a24"/>
-  <path d="M34 30 h30 q6 0 6 5 h-6 q-2 4 -8 4 h-8 q-6 0-8-4 h-6 q0-5 6-5z" fill="#7d8894" stroke="#3c444d" stroke-width="1.4"/>
-  <path d="M42 39 h14 v6 H42z" fill="#5d6774"/>
-  <path d="M70 8 l14 8 -6 10 -14-8z" fill="#8a98a6" stroke="#40484f" stroke-width="1.3"/>
-  <path d="M64 18 L44 32" stroke="#7a5a30" stroke-width="5"/>
-  <circle cx="30" cy="24" r="2.6" fill="#ffe08a"/><circle cx="22" cy="32" r="2" fill="#ffc65a"/>
-  <circle cx="38" cy="18" r="1.8" fill="#ffe08a"/><circle cx="16" cy="22" r="1.6" fill="#ffb347"/>
-  <path d="M46 26 q4 -6 8 0" stroke="#ffd98a" stroke-width="2" fill="none" opacity=".85"/></svg>`,
+  chancellor:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#3d3550"/>
+  <rect x="0" y="42" width="100" height="14" fill="#5b4a33"/>
+  <path d="M18 44 V16 q0 -6 6 -6 h52 q6 0 6 6 v28z" fill="#f2e7cc" stroke="#8a6a3a" stroke-width="1.6"/>
+  <path d="M24 10 q-6 0 -6 6 v28 h-6 V16 q0 -6 6 -6z" fill="#ddceac" stroke="#8a6a3a" stroke-width="1.2"/>
+  <path d="M28 20 h34 M28 26 h40 M28 32 h30 M28 38 h36" stroke="#a08a62" stroke-width="1.8" stroke-linecap="round"/>
+  <circle cx="76" cy="38" r="8" fill="#b32232" stroke="#6b0f19" stroke-width="1.4"/>
+  <path d="M76 33 l1.6 3.4 3.6 .5-2.6 2.6 .6 3.6-3.2-1.7-3.2 1.7 .6-3.6-2.6-2.6 3.6-.5z" fill="#f4dd93"/>
+  <path d="M84 8 L66 26" stroke="#d9b64c" stroke-width="3" stroke-linecap="round"/>
+  <path d="M84 8 q6 -4 8 2 q-6 2 -8 -2z" fill="#e8ecef"/></svg>`,
 
   village:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#c9dff0"/>
   <path d="M0 40 q25 -8 50 -3 t50 -4 V56 H0z" fill="#5b9c5e"/><path d="M0 47 q30 -5 55 1 t45 -2 V56 H0z" fill="#3f7f45"/>
@@ -1099,52 +1186,352 @@ const ART = {
   <circle cx="66" cy="12" r="5" fill="none" stroke="#c3ccd6" stroke-width="2.4"/>
   <path d="M69 15 L78 24" stroke="#c3ccd6" stroke-width="3"/>
   <rect x="30" y="30" width="16" height="8" fill="#c49a5e" stroke="#4a2f12" stroke-width="1"/>
-  <path d="M8 30 h8 v8 h-8z" fill="#e8c15c" stroke="#8a6a12" stroke-width="1"/></svg>`
+  <path d="M8 30 h8 v8 h-8z" fill="#e8c15c" stroke="#8a6a12" stroke-width="1"/></svg>`,
+
+  bureaucrat:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#454f63"/>
+  <rect x="0" y="40" width="100" height="16" fill="#6b5636"/>
+  <path d="M10 40 V18 h34 v22z" fill="#f2e7cc" stroke="#7a6034" stroke-width="1.4"/>
+  <path d="M44 40 V18 h34 v22z" fill="#e4d6b4" stroke="#7a6034" stroke-width="1.4"/>
+  <path d="M44 18 v22" stroke="#7a6034" stroke-width="2"/>
+  <path d="M16 24 h22 M16 29 h22 M16 34 h16 M50 24 h22 M50 29 h18 M50 34 h22" stroke="#a08a62" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M84 6 L66 24" stroke="#8a6a3a" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M84 6 q7 -3 8 3 q-6 2 -8 -3z" fill="#e8ecef" stroke="#7a6034" stroke-width=".8"/>
+  <circle cx="84" cy="36" r="10" fill="#cfd6dd" stroke="#5d6774" stroke-width="2"/>
+  <circle cx="84" cy="36" r="6" fill="none" stroke="#fff" stroke-width="1.2"/>
+  <text x="84" y="40" font-size="9" font-weight="bold" text-anchor="middle" fill="#4a545e" font-family="serif">2</text>
+  <path d="M84 20 l0 8 M80 24 l4 -4 4 4" stroke="#f4dd93" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`,
+
+  feast:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#4d2f22"/>
+  <path d="M0 34 h100 v6 H0z" fill="#c9a06a"/><path d="M0 40 h100 v16 H0z" fill="#7a5330"/>
+  <ellipse cx="46" cy="28" rx="22" ry="7" fill="#dfe6ee" stroke="#8b98a6" stroke-width="1.4"/>
+  <path d="M32 26 q6 -12 15 -12 q10 0 14 12 q-14 5 -29 0z" fill="#b2632f" stroke="#6d3a12" stroke-width="1.3"/>
+  <path d="M40 18 q5 -5 9 0" stroke="#e0a86b" stroke-width="1.6" fill="none"/>
+  <path d="M74 14 v20 M70 34 h8 v-4 q0 -3 -4 -3 q-4 0 -4 3z" fill="#f4dd93" stroke="#8a6a12" stroke-width="1.2"/>
+  <path d="M69 12 q5 6 10 0 q-2 8 -5 8 q-3 0 -5 -8z" fill="#b32232" stroke="#6b0f19" stroke-width="1"/>
+  <path d="M16 16 v18 M13 16 v7 M19 16 v7" stroke="#cfd6dd" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M24 16 v18" stroke="#cfd6dd" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="88" cy="26" r="6" fill="#e8c15c" stroke="#8a6a12" stroke-width="1.2"/>
+  <circle cx="8" cy="42" r="3" fill="#ffd98a" opacity=".7"/></svg>`,
+
+  gardens:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#a8ccdf"/>
+  <path d="M0 26 h100 v30 H0z" fill="#4e8a52"/>
+  <path d="M50 26 v30 M0 40 h100" stroke="#c9b98a" stroke-width="3"/>
+  <ellipse cx="50" cy="40" rx="12" ry="8" fill="#7fc3e0" stroke="#c9b98a" stroke-width="2.4"/>
+  <path d="M50 36 v-4 M47 33 q3 -4 6 0" stroke="#dff0ff" stroke-width="1.6" fill="none"/>
+  <rect x="8" y="30" width="30" height="7" rx="3" fill="#2f6b39"/>
+  <rect x="62" y="30" width="30" height="7" rx="3" fill="#2f6b39"/>
+  <rect x="8" y="45" width="30" height="7" rx="3" fill="#2f6b39"/>
+  <rect x="62" y="45" width="30" height="7" rx="3" fill="#2f6b39"/>
+  <circle cx="14" cy="33" r="2" fill="#e8637a"/><circle cx="24" cy="33" r="2" fill="#f4dd93"/><circle cx="33" cy="33" r="2" fill="#e8637a"/>
+  <circle cx="68" cy="33" r="2" fill="#f4dd93"/><circle cx="78" cy="33" r="2" fill="#e8637a"/><circle cx="87" cy="33" r="2" fill="#f4dd93"/>
+  <circle cx="14" cy="48" r="2" fill="#f4dd93"/><circle cx="24" cy="48" r="2" fill="#e8637a"/><circle cx="33" cy="48" r="2" fill="#f4dd93"/>
+  <circle cx="68" cy="48" r="2" fill="#e8637a"/><circle cx="78" cy="48" r="2" fill="#f4dd93"/><circle cx="87" cy="48" r="2" fill="#e8637a"/>
+  <path d="M0 26 h100" stroke="#3d6b41" stroke-width="2"/>
+  <path d="M18 8 q6 -6 12 0 q6 -6 12 0 v10 H18z" fill="#7fae5f" opacity=".55"/></svg>`,
+
+  militia:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><defs><radialGradient id="mlbg" cx="50%" cy="45%"><stop offset="0" stop-color="#9c2130"/><stop offset="1" stop-color="#3d0810"/></radialGradient></defs>
+  <rect width="100" height="56" fill="url(#mlbg)"/>
+  <path d="M16 48 L52 6" stroke="#8a6a3a" stroke-width="4"/><path d="M52 6 l7 3-4 7z" fill="#dfe6ee"/>
+  <path d="M84 48 L48 6" stroke="#8a6a3a" stroke-width="4"/><path d="M48 6 l-7 3 4 7z" fill="#dfe6ee"/>
+  <path d="M50 16 c-12 0-19 8-19 18 v6 h38 v-6 c0-10-7-18-19-18z" fill="#b9c3cd" stroke="#5d6774" stroke-width="1.6"/>
+  <path d="M31 34 h38 v5 H31z" fill="#8b98a6"/>
+  <path d="M46 22 h8 v18 h-8z" fill="#3b4450"/>
+  <path d="M34 26 h10 v6 h-10z M56 26 h10 v6 h-10z" fill="#2b323b"/>
+  <path d="M42 12 q8 -8 16 0 q-8 4 -16 0z" fill="#d9b64c"/>
+  <path d="M22 46 h56 v4 H22z" fill="#5d2a16"/></svg>`,
+
+  moneylender:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#4a3d28"/>
+  <rect x="0" y="44" width="100" height="12" fill="#6b5334"/>
+  <path d="M50 4 v34" stroke="#8a6a3a" stroke-width="3"/>
+  <path d="M22 14 h56" stroke="#8a6a3a" stroke-width="3"/>
+  <path d="M22 14 L14 30 h16z" fill="#cfd6dd" stroke="#5d6774" stroke-width="1.3"/>
+  <path d="M78 14 L70 30 h16z" fill="#cfd6dd" stroke="#5d6774" stroke-width="1.3"/>
+  <circle cx="22" cy="34" r="5" fill="#c2703a" stroke="#6d3a12" stroke-width="1.2"/>
+  <path d="M64 30 q-6 6 -2 12 q4 6 16 6 q12 0 16 -6 q4 -6 -2 -12z" fill="#b98a4a" stroke="#6b4a25" stroke-width="1.3" transform="translate(-16,-2) scale(.82) translate(14,6)"/>
+  <ellipse cx="78" cy="42" rx="11" ry="9" fill="#c9a06a" stroke="#6b4a25" stroke-width="1.3"/>
+  <path d="M72 33 q6 -4 12 0" stroke="#6b4a25" stroke-width="2" fill="none"/>
+  <text x="78" y="46" font-size="10" font-weight="bold" text-anchor="middle" fill="#6b4a25" font-family="serif">$</text>
+  <path d="M46 38 h8 v6 h-8z" fill="#8a6a3a"/>
+  <circle cx="50" cy="6" r="3.4" fill="#f4dd93"/></svg>`,
+
+  remodel:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#5b4a33"/>
+  <rect x="6" y="20" width="24" height="20" rx="2" fill="#8a6a42" stroke="#3d2c17" stroke-width="1.4"/>
+  <path d="M6 30 h24 M18 20 v20" stroke="#3d2c17" stroke-width="1.2"/>
+  <path d="M40 30 h16" stroke="#f4dd93" stroke-width="4"/><path d="M56 24 l10 6-10 6z" fill="#f4dd93"/>
+  <rect x="70" y="16" width="24" height="28" rx="2" fill="#e8dcc0" stroke="#6c5a3a" stroke-width="1.4"/>
+  <path d="M70 16 h4v-4h4v4h4v-4h4v4h4v-4h4v4" fill="none" stroke="#6c5a3a" stroke-width="2"/>
+  <rect x="78" y="30" width="8" height="14" fill="#6c5a3a"/>
+  <path d="M30 48 l14-14" stroke="#7a5a30" stroke-width="4"/>
+  <path d="M40 28 l10 -8 8 8 -10 8z" fill="#b9c3cd" stroke="#5d6774" stroke-width="1.2" opacity=".9"/>
+  <circle cx="34" cy="12" r="2.6" fill="#f4dd93" opacity=".8"/><circle cx="62" cy="48" r="2.2" fill="#f4dd93" opacity=".6"/></svg>`,
+
+  smithy:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><defs><radialGradient id="fg" cx="24%" cy="60%"><stop offset="0" stop-color="#ffb347"/><stop offset="1" stop-color="#3a2412"/></radialGradient></defs>
+  <rect width="100" height="56" fill="url(#fg)"/>
+  <path d="M0 48 h100 v8 H0z" fill="#2a1c0e"/>
+  <path d="M26 44 h44 v4 H26z" fill="#4a3a24"/>
+  <path d="M34 30 h30 q6 0 6 5 h-6 q-2 4 -8 4 h-8 q-6 0-8-4 h-6 q0-5 6-5z" fill="#7d8894" stroke="#3c444d" stroke-width="1.4"/>
+  <path d="M42 39 h14 v6 H42z" fill="#5d6774"/>
+  <path d="M70 8 l14 8 -6 10 -14-8z" fill="#8a98a6" stroke="#40484f" stroke-width="1.3"/>
+  <path d="M64 18 L44 32" stroke="#7a5a30" stroke-width="5"/>
+  <circle cx="30" cy="24" r="2.6" fill="#ffe08a"/><circle cx="22" cy="32" r="2" fill="#ffc65a"/>
+  <circle cx="38" cy="18" r="1.8" fill="#ffe08a"/><circle cx="16" cy="22" r="1.6" fill="#ffb347"/>
+  <path d="M46 26 q4 -6 8 0" stroke="#ffd98a" stroke-width="2" fill="none" opacity=".85"/></svg>`,
+
+  spy:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><defs><radialGradient id="spbg" cx="50%" cy="40%"><stop offset="0" stop-color="#4b4160"/><stop offset="1" stop-color="#161122"/></radialGradient></defs>
+  <rect width="100" height="56" fill="url(#spbg)"/>
+  <circle cx="22" cy="12" r="2" fill="#f4dd93" opacity=".8"/><circle cx="84" cy="10" r="1.6" fill="#f4dd93" opacity=".6"/>
+  <path d="M50 12 q-16 0 -20 18 q-2 10 -2 18 h44 q0 -8 -2 -18 q-4 -18 -20 -18z" fill="#2b2438" stroke="#151020" stroke-width="1.4"/>
+  <path d="M50 12 q-13 0 -17 14 q9 -6 17 -6 q8 0 17 6 q-4 -14 -17 -14z" fill="#3c3350"/>
+  <ellipse cx="50" cy="30" rx="12" ry="9" fill="#0e0a16"/>
+  <ellipse cx="43" cy="29" rx="4" ry="3" fill="#ffe9a8"/><circle cx="43" cy="29" r="1.5" fill="#2b2438"/>
+  <ellipse cx="57" cy="29" rx="4" ry="3" fill="#ffe9a8"/><circle cx="57" cy="29" r="1.5" fill="#2b2438"/>
+  <path d="M64 40 l18 -8" stroke="#8a6a3a" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="84" cy="31" r="6" fill="none" stroke="#cfd6dd" stroke-width="2"/>
+  <circle cx="84" cy="31" r="3" fill="#7fc3e0" opacity=".7"/>
+  <path d="M14 44 h16 v8 h-16z" fill="#f2e7cc" stroke="#8a6a3a" stroke-width="1.2" transform="rotate(-12 22 48)"/></svg>`,
+
+  thief:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><defs><radialGradient id="thbg" cx="50%" cy="40%"><stop offset="0" stop-color="#3f3a2c"/><stop offset="1" stop-color="#14110a"/></radialGradient></defs>
+  <rect width="100" height="56" fill="url(#thbg)"/>
+  <path d="M0 48 h100 v8 H0z" fill="#241d10"/>
+  <circle cx="36" cy="22" r="12" fill="#3b3323" stroke="#1a150c" stroke-width="1.4"/>
+  <path d="M24 20 q12 -8 24 0 v4 H24z" fill="#161109"/>
+  <path d="M26 22 h20 v5 H26z" fill="#0e0a06"/>
+  <circle cx="32" cy="24.5" r="1.8" fill="#ffe9a8"/><circle cx="41" cy="24.5" r="1.8" fill="#ffe9a8"/>
+  <path d="M26 34 q10 -4 20 0 q6 6 6 14 H20 q0 -8 6 -14z" fill="#4a4030" stroke="#1a150c" stroke-width="1.3"/>
+  <path d="M64 30 q-10 8 -6 18 h34 q4 -10 -6 -18 q-4 -3 -11 -3 q-7 0 -11 3z" fill="#8a6a42" stroke="#4a2f12" stroke-width="1.4"/>
+  <path d="M64 30 q11 -6 22 0" stroke="#4a2f12" stroke-width="2" fill="none"/>
+  <circle cx="75" cy="40" r="6" fill="#e8c15c" stroke="#8a6a12" stroke-width="1.2"/>
+  <text x="75" y="44" font-size="9" font-weight="bold" text-anchor="middle" fill="#7d5c0c" font-family="serif">$</text>
+  <circle cx="88" cy="14" r="2.4" fill="#f4dd93" opacity=".7"/></svg>`,
+
+  throneroom:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><defs><linearGradient id="trbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5c1f2c"/><stop offset="1" stop-color="#2a0a12"/></linearGradient></defs>
+  <rect width="100" height="56" fill="url(#trbg)"/>
+  <path d="M0 46 h100 v10 H0z" fill="#3d2c17"/>
+  <path d="M28 46 h44 v4 H28z" fill="#7e1420"/>
+  <path d="M34 46 V16 q0 -6 6 -6 h20 q6 0 6 6 v30z" fill="#d9b64c" stroke="#7d5c0c" stroke-width="1.6"/>
+  <path d="M38 44 V18 h24 v26z" fill="#8f1524" stroke="#5b0d18" stroke-width="1.2"/>
+  <path d="M34 16 h4v-5h4v5h4v-7h4v7h4v-5h4v5h4" fill="none" stroke="#f4dd93" stroke-width="2.2"/>
+  <path d="M30 46 v6 M70 46 v6" stroke="#7d5c0c" stroke-width="3"/>
+  <path d="M50 22 l2.6 5.4 5.8 .8-4.2 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.2-4.1 5.8-.8z" fill="#f4dd93"/>
+  <path d="M12 20 v26 M88 20 v26" stroke="#8a6a3a" stroke-width="4"/>
+  <circle cx="12" cy="16" r="4" fill="#ffd98a" opacity=".85"/><circle cx="88" cy="16" r="4" fill="#ffd98a" opacity=".85"/></svg>`,
+
+  councilroom:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#3a4152"/>
+  <path d="M0 44 h100 v12 H0z" fill="#5b4a33"/>
+  <ellipse cx="50" cy="34" rx="30" ry="12" fill="#a97a44" stroke="#4a2f12" stroke-width="1.6"/>
+  <ellipse cx="50" cy="32" rx="30" ry="11" fill="#c9a06a" stroke="#4a2f12" stroke-width="1.4"/>
+  <ellipse cx="50" cy="32" rx="18" ry="6" fill="none" stroke="#8a6a42" stroke-width="1.4"/>
+  <circle cx="14" cy="30" r="6" fill="#dfe6ee" stroke="#5d6774" stroke-width="1.3"/>
+  <circle cx="86" cy="30" r="6" fill="#dfe6ee" stroke="#5d6774" stroke-width="1.3"/>
+  <circle cx="34" cy="16" r="6" fill="#dfe6ee" stroke="#5d6774" stroke-width="1.3"/>
+  <circle cx="66" cy="16" r="6" fill="#dfe6ee" stroke="#5d6774" stroke-width="1.3"/>
+  <path d="M8 38 q6 -4 12 0 v8 H8z" fill="#7e1420"/><path d="M80 38 q6 -4 12 0 v8 H80z" fill="#15492e"/>
+  <path d="M28 22 q6 -4 12 0 v6 H28z" fill="#163f68"/><path d="M60 22 q6 -4 12 0 v6 H60z" fill="#7d5c0c"/>
+  <rect x="42" y="26" width="16" height="8" fill="#f2e7cc" stroke="#8a6a3a" stroke-width="1"/>
+  <path d="M46 29 h8 M46 31.5 h6" stroke="#a08a62" stroke-width="1"/>
+  <circle cx="50" cy="8" r="4" fill="#ffd98a" opacity=".8"/><circle cx="50" cy="8" r="8" fill="#ffd98a" opacity=".2"/></svg>`,
+
+  festival:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><defs><linearGradient id="fesky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2350"/><stop offset="1" stop-color="#7a4a6a"/></linearGradient></defs>
+  <rect width="100" height="56" fill="url(#fesky)"/>
+  <path d="M0 12 q25 10 50 0 t50 0" stroke="#d9b64c" stroke-width="1.6" fill="none"/>
+  <path d="M8 14 l6 10 6 -10z" fill="#b32232"/><path d="M24 17 l6 10 6 -10z" fill="#d9b64c"/>
+  <path d="M40 18 l6 10 6 -10z" fill="#2a7a4c"/><path d="M56 17 l6 10 6 -10z" fill="#2f7bbd"/>
+  <path d="M72 15 l6 10 6 -10z" fill="#b32232"/><path d="M86 13 l6 10 6 -10z" fill="#d9b64c"/>
+  <path d="M0 44 h100 v12 H0z" fill="#5b4a33"/>
+  <path d="M30 44 V30 h40 v14z" fill="#e8dcc0" stroke="#7a6034" stroke-width="1.3"/>
+  <path d="M26 31 L50 20 L74 31z" fill="#7e1420" stroke="#4d0a12" stroke-width="1.3"/>
+  <rect x="44" y="34" width="12" height="10" fill="#6d4c26"/>
+  <circle cx="16" cy="34" r="6" fill="#f4dd93" opacity=".9"/><circle cx="84" cy="34" r="6" fill="#f4dd93" opacity=".9"/>
+  <path d="M16 26 l1.6 4 4 1.6-4 1.6L16 37l-1.6-3.8-4-1.6 4-1.6z" fill="#fff6c8"/>
+  <path d="M84 24 l1.4 3.4 3.4 1.4-3.4 1.4L84 34l-1.4-3.8-3.4-1.4 3.4-1.4z" fill="#fff6c8"/></svg>`,
+
+  laboratory:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#26323f"/>
+  <rect x="0" y="44" width="100" height="12" fill="#4a3d28"/>
+  <path d="M40 8 h20 v14 l12 22 H28 l12 -22z" fill="#cfe6f2" opacity=".35" stroke="#9fd3e8" stroke-width="1.6"/>
+  <path d="M34 32 h32 l6 12 H28z" fill="#2fa8a0" opacity=".85"/>
+  <circle cx="44" cy="38" r="2.4" fill="#bff5ef" opacity=".9"/><circle cx="55" cy="41" r="1.8" fill="#bff5ef" opacity=".8"/>
+  <circle cx="50" cy="36" r="1.4" fill="#bff5ef" opacity=".7"/>
+  <path d="M38 6 h24" stroke="#9fd3e8" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M14 22 h14 v18 q0 4 -4 4 h-6 q-4 0 -4 -4z" fill="#cfe6f2" opacity=".35" stroke="#9fd3e8" stroke-width="1.4"/>
+  <path d="M14 32 h14 v8 q0 4 -4 4 h-6 q-4 0 -4 -4z" fill="#e0596d" opacity=".8"/>
+  <path d="M12 20 h18" stroke="#9fd3e8" stroke-width="2" stroke-linecap="round"/>
+  <path d="M74 26 q10 0 10 9 q0 9 -10 9 q-10 0 -10 -9 q0 -9 10 -9z" fill="#cfe6f2" opacity=".35" stroke="#9fd3e8" stroke-width="1.4"/>
+  <path d="M66 36 q8 4 16 0 q0 8 -8 8 q-8 0 -8 -8z" fill="#f4dd93" opacity=".85"/>
+  <path d="M72 26 v-8 h4 v8" fill="none" stroke="#9fd3e8" stroke-width="1.6"/>
+  <circle cx="50" cy="16" r="1.8" fill="#bff5ef" opacity=".7"/><circle cx="56" cy="12" r="1.2" fill="#bff5ef" opacity=".6"/></svg>`,
+
+  library:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#3d2c1c"/>
+  <rect x="0" y="0" width="100" height="26" fill="#5b4630"/>
+  <rect x="4" y="4" width="42" height="20" fill="#2a1c10"/>
+  <rect x="54" y="4" width="42" height="20" fill="#2a1c10"/>
+  <rect x="7" y="7" width="5" height="17" fill="#b32232"/><rect x="13" y="9" width="5" height="15" fill="#2a7a4c"/>
+  <rect x="19" y="6" width="6" height="18" fill="#2f7bbd"/><rect x="26" y="10" width="5" height="14" fill="#d9b64c"/>
+  <rect x="32" y="7" width="5" height="17" fill="#7a3f86"/><rect x="38" y="9" width="6" height="15" fill="#b98a4a"/>
+  <rect x="57" y="9" width="5" height="15" fill="#2a7a4c"/><rect x="63" y="6" width="6" height="18" fill="#b32232"/>
+  <rect x="70" y="10" width="5" height="14" fill="#2f7bbd"/><rect x="76" y="7" width="5" height="17" fill="#d9b64c"/>
+  <rect x="82" y="9" width="6" height="15" fill="#7a3f86"/><rect x="89" y="6" width="5" height="18" fill="#2a7a4c"/>
+  <rect x="0" y="26" width="100" height="4" fill="#3d2c17"/>
+  <path d="M50 34 q-18 -6 -30 0 v18 q12 -5 30 0z" fill="#f2e7cc" stroke="#8a6a3a" stroke-width="1.4"/>
+  <path d="M50 34 q18 -6 30 0 v18 q-18 -5 -30 0z" fill="#e4d6b4" stroke="#8a6a3a" stroke-width="1.4"/>
+  <path d="M50 34 v18" stroke="#8a6a3a" stroke-width="1.6"/>
+  <path d="M26 40 h18 M26 44 h16 M56 40 h18 M56 44 h16" stroke="#b0996d" stroke-width="1.2"/></svg>`,
+
+  market:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#cfa76a"/>
+  <rect x="0" y="40" width="100" height="16" fill="#8a6a42"/>
+  <path d="M8 20 h84 v10 H8z" fill="#f1e3c4"/>
+  <path d="M8 20 h84 l-4 -8 H12z" fill="#7e1420"/>
+  <path d="M8 30 q7 8 14 0 q7 8 14 0 q7 8 14 0 q7 8 14 0 q7 8 14 0 q7 8 14 0 V30z" fill="#7e1420"/>
+  <rect x="14" y="20" width="6" height="10" fill="#f1e3c4"/><rect x="34" y="20" width="6" height="10" fill="#f1e3c4"/>
+  <rect x="54" y="20" width="6" height="10" fill="#f1e3c4"/><rect x="74" y="20" width="6" height="10" fill="#f1e3c4"/>
+  <rect x="12" y="8" width="4" height="34" fill="#6b4a25"/><rect x="84" y="8" width="4" height="34" fill="#6b4a25"/>
+  <rect x="18" y="36" width="64" height="6" fill="#a97a44" stroke="#5f4120" stroke-width="1"/>
+  <circle cx="32" cy="34" r="4" fill="#e8c15c" stroke="#8a6a12" stroke-width="1"/>
+  <circle cx="41" cy="34" r="4" fill="#e8c15c" stroke="#8a6a12" stroke-width="1"/>
+  <circle cx="60" cy="34" r="3.4" fill="#c85a45"/><circle cx="68" cy="34" r="3.4" fill="#5b9c5e"/></svg>`,
+
+  mine:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><rect width="100" height="56" fill="#2e2519"/>
+  <path d="M0 56 L14 26 H86 L100 56z" fill="#4a3d28"/>
+  <path d="M22 56 L32 34 h36 l10 22z" fill="#241c11"/>
+  <path d="M18 18 q14 -10 30 -2" stroke="#a7885a" stroke-width="4" fill="none"/>
+  <path d="M48 16 L36 40" stroke="#7a5a30" stroke-width="4"/>
+  <path d="M14 14 q18 -12 36 2 l-4 5 q-14 -11 -28 -2z" fill="#cfd6dd" stroke="#7d8894" stroke-width="1.2"/>
+  <path d="M56 44 l5-9 5 9-5 5z" fill="#57d1c8" stroke="#1f7a72" stroke-width="1"/>
+  <path d="M70 46 l4-7 4 7-4 4z" fill="#e0596d" stroke="#8a2131" stroke-width="1"/>
+  <path d="M44 48 l3.5-6 3.5 6-3.5 3.5z" fill="#e8c15c" stroke="#8a6a12" stroke-width="1"/>
+  <circle cx="86" cy="14" r="4" fill="#ffd98a" opacity=".8"/><circle cx="86" cy="14" r="9" fill="#ffd98a" opacity=".18"/></svg>`,
+
+  witch:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><defs><radialGradient id="wtbg" cx="50%" cy="60%"><stop offset="0" stop-color="#3f6b4a"/><stop offset="1" stop-color="#141a20"/></radialGradient></defs>
+  <rect width="100" height="56" fill="url(#wtbg)"/>
+  <circle cx="20" cy="10" r="7" fill="#f2e7cc" opacity=".6"/>
+  <path d="M30 8 q6 -2 10 2 q-5 3 -10 -2z" fill="#5aa06a" opacity=".5"/>
+  <path d="M50 22 q-12 4 -14 12 h28 q-2 -8 -14 -12z" fill="#2b2438" stroke="#151020" stroke-width="1.2"/>
+  <path d="M50 4 L36 26 h28z" fill="#2b2438" stroke="#151020" stroke-width="1.4"/>
+  <path d="M34 26 h32 v4 H34z" fill="#3c3350" stroke="#151020" stroke-width="1.2"/>
+  <path d="M44 8 q6 6 12 0" stroke="#7a3f86" stroke-width="2" fill="none"/>
+  <path d="M28 40 q0 12 22 12 q22 0 22 -12z" fill="#3b4450" stroke="#1a2028" stroke-width="1.6"/>
+  <ellipse cx="50" cy="40" rx="22" ry="6" fill="#5aa06a"/>
+  <ellipse cx="50" cy="40" rx="16" ry="4" fill="#8fe0a0" opacity=".8"/>
+  <circle cx="42" cy="34" r="3" fill="#8fe0a0" opacity=".7"/><circle cx="57" cy="31" r="2.2" fill="#8fe0a0" opacity=".6"/>
+  <circle cx="50" cy="28" r="1.6" fill="#8fe0a0" opacity=".5"/>
+  <path d="M20 46 h6 v8 h-6z M74 46 h6 v8 h-6z" fill="#241d10"/></svg>`,
+
+  adventurer:`<svg viewBox="0 0 100 56" preserveAspectRatio="none"><defs><radialGradient id="advbg" cx="50%" cy="60%"><stop offset="0" stop-color="#6b5a2e"/><stop offset="1" stop-color="#221a0c"/></radialGradient></defs>
+  <rect width="100" height="56" fill="url(#advbg)"/>
+  <path d="M0 48 h100 v8 H0z" fill="#3d2c17"/>
+  <path d="M26 48 V30 q0 -12 24 -12 q24 0 24 12 v18z" fill="#8a6a42" stroke="#4a2f12" stroke-width="1.6"/>
+  <path d="M26 30 q24 -10 48 0" stroke="#4a2f12" stroke-width="1.6" fill="none"/>
+  <path d="M26 34 h48 v6 H26z" fill="#c9a06a" stroke="#4a2f12" stroke-width="1.2"/>
+  <rect x="45" y="32" width="10" height="12" rx="2" fill="#d9b64c" stroke="#7d5c0c" stroke-width="1.2"/>
+  <circle cx="50" cy="38" r="1.8" fill="#4a2f12"/>
+  <circle cx="34" cy="24" r="5" fill="#e8c15c" stroke="#8a6a12" stroke-width="1.2"/>
+  <circle cx="66" cy="24" r="5" fill="#e8c15c" stroke="#8a6a12" stroke-width="1.2"/>
+  <circle cx="50" cy="14" r="6" fill="#e8c15c" stroke="#8a6a12" stroke-width="1.4"/>
+  <text x="50" y="18" font-size="8" font-weight="bold" text-anchor="middle" fill="#7d5c0c" font-family="serif">$</text>
+  <path d="M10 20 l1.8 4.4 4.4 1.8 -4.4 1.8 L10 32.4 l-1.8 -4.4 -4.4 -1.8 4.4 -1.8z" fill="#fff6c8" opacity=".85"/>
+  <path d="M88 16 l1.4 3.4 3.4 1.4 -3.4 1.4 L88 26 l-1.4 -3.8 -3.4 -1.4 3.4 -1.4z" fill="#fff6c8" opacity=".7"/></svg>`
 };
 
 /* ---------- 卡牌定義 ---------- */
 const CARDS = {
-  copper:{n:"銅幣",en:"Copper",cost:0,kind:"treasure",coin:1,label:"錢幣",
-    txt:"+$1"},
-  silver:{n:"銀幣",en:"Silver",cost:3,kind:"treasure",coin:2,label:"錢幣",
-    txt:"+$2"},
-  gold:{n:"金幣",en:"Gold",cost:6,kind:"treasure",coin:3,label:"錢幣",
-    txt:"+$3"},
-  estate:{n:"莊園",en:"Estate",cost:2,kind:"victory",vp:1,label:"領地",
-    txt:"1 分"},
-  duchy:{n:"公國",en:"Duchy",cost:5,kind:"victory",vp:3,label:"領地",
-    txt:"3 分"},
-  province:{n:"行省",en:"Province",cost:8,kind:"victory",vp:6,label:"領地",
-    txt:"6 分"},
-  curse:{n:"詛咒",en:"Curse",cost:0,kind:"curse",vp:-1,label:"詛咒",
-    txt:"−1 分"},
+  /* 基礎牌 */
+  copper:{n:"銅幣",en:"Copper",cost:0,kind:"treasure",coin:1,label:"錢幣",txt:"+$1"},
+  silver:{n:"銀幣",en:"Silver",cost:3,kind:"treasure",coin:2,label:"錢幣",txt:"+$2"},
+  gold:{n:"金幣",en:"Gold",cost:6,kind:"treasure",coin:3,label:"錢幣",txt:"+$3"},
+  estate:{n:"莊園",en:"Estate",cost:2,kind:"victory",vp:1,label:"領地",txt:"1 分"},
+  duchy:{n:"公國",en:"Duchy",cost:5,kind:"victory",vp:3,label:"領地",txt:"3 分"},
+  province:{n:"行省",en:"Province",cost:8,kind:"victory",vp:6,label:"領地",txt:"6 分"},
+  curse:{n:"詛咒",en:"Curse",cost:0,kind:"curse",vp:-1,label:"詛咒",noBuy:true,
+    txt:"−1 分\n🔒 不可購買\n僅由女巫等牌給予"},
 
-  cellar:{n:"地下室",en:"Cellar",cost:2,kind:"action",label:"行動",
-    txt:"+1 行動\n棄掉任意張手牌，\n再抽等量的牌"},
-  market:{n:"市場",en:"Market",cost:5,kind:"action",label:"行動",
-    txt:"+1 卡片　+1 行動\n+1 購買　+$1"},
-  militia:{n:"民兵",en:"Militia",cost:4,kind:"action",attack:true,label:"行動 · 攻擊",
-    txt:"+$2\n其他玩家棄牌至\n剩 3 張手牌"},
-  mine:{n:"礦坑",en:"Mine",cost:5,kind:"action",label:"行動",
-    txt:"廢除手中 1 張錢幣，\n獲得價格 +$3 內的\n錢幣至手牌"},
+  /* $2 */
+  cellar:{n:"地窖",en:"Cellar",cost:2,kind:"action",label:"行動",
+    txt:"+1 行動\n棄任意張手牌，\n再抽回等量的牌"},
+  chapel:{n:"禮拜堂",en:"Chapel",cost:2,kind:"action",label:"行動",
+    txt:"廢除手中最多 4 張牌\n（可選 0 張）"},
   moat:{n:"護城河",en:"Moat",cost:2,kind:"action",reaction:true,label:"行動 · 反應",
-    txt:"+2 卡片\n受攻擊時可展示，\n免疫該次攻擊"},
-  remodel:{n:"改造",en:"Remodel",cost:4,kind:"action",label:"行動",
-    txt:"廢除手中 1 張牌，\n獲得價格 +$2 內\n的牌"},
-  smithy:{n:"鐵匠",en:"Smithy",cost:4,kind:"action",label:"行動",
-    txt:"+3 卡片"},
+    txt:"+2 卡片\n他人打出攻擊牌時可\n展示，免疫該次攻擊"},
+
+  /* $3 */
+  chancellor:{n:"大臣",en:"Chancellor",cost:3,kind:"action",label:"行動",
+    txt:"+$2\n可將整疊牌庫\n放入棄牌堆"},
   village:{n:"村莊",en:"Village",cost:3,kind:"action",label:"行動",
     txt:"+1 卡片　+2 行動"},
-  woodcutter:{n:"木匠",en:"Woodcutter",cost:3,kind:"action",label:"行動",
+  woodcutter:{n:"伐木工",en:"Woodcutter",cost:3,kind:"action",label:"行動",
     txt:"+1 購買　+$2"},
-  workshop:{n:"工坊",en:"Workshop",cost:3,kind:"action",label:"行動",
-    txt:"獲得價格 $4 以內\n的牌"}
+  workshop:{n:"工作室",en:"Workshop",cost:3,kind:"action",label:"行動",
+    txt:"獲得一張費用\n不超過 $4 的牌"},
+
+  /* $4 */
+  bureaucrat:{n:"官員",en:"Bureaucrat",cost:4,kind:"action",attack:true,label:"行動 · 攻擊",
+    txt:"獲得銀幣至牌庫頂\n他人須將勝利牌\n放回自己牌庫頂"},
+  feast:{n:"晚宴",en:"Feast",cost:4,kind:"action",label:"行動",
+    txt:"廢除這張晚宴\n獲得費用不超過\n$5 的牌"},
+  gardens:{n:"花園",en:"Gardens",cost:4,kind:"victory",vp:0,gardens:true,label:"領地",
+    txt:"牌組每滿 10 張\n本牌值 1 分\n（不足捨去）"},
+  militia:{n:"義勇軍",en:"Militia",cost:4,kind:"action",attack:true,label:"行動 · 攻擊",
+    txt:"+$2\n其他玩家棄牌至\n剩 3 張手牌"},
+  moneylender:{n:"錢莊",en:"Moneylender",cost:4,kind:"action",label:"行動",
+    txt:"廢除手中 1 張銅幣，\n成功廢除則 +$3"},
+  remodel:{n:"重建",en:"Remodel",cost:4,kind:"action",label:"行動",
+    txt:"廢除 1 張手牌\n獲得費用最多\n+$2 的牌"},
+  smithy:{n:"鐵匠",en:"Smithy",cost:4,kind:"action",label:"行動",
+    txt:"+3 卡片"},
+  spy:{n:"間諜",en:"Spy",cost:4,kind:"action",attack:true,label:"行動 · 攻擊",
+    txt:"+1 卡片　+1 行動\n全體翻開牌庫頂\n由你決定棄或留"},
+  thief:{n:"小偷",en:"Thief",cost:4,kind:"action",attack:true,label:"行動 · 攻擊",
+    txt:"他人翻牌庫頂 2 張\n你選 1 張財寶廢除\n並可據為己有"},
+  throneroom:{n:"王座",en:"Throne Room",cost:4,kind:"action",label:"行動",
+    txt:"選 1 張手中行動牌，\n將它連續執行兩次"},
+
+  /* $5 */
+  councilroom:{n:"議事廳",en:"Council Room",cost:5,kind:"action",label:"行動",
+    txt:"+4 卡片　+1 購買\n其他玩家各抽 1 張"},
+  festival:{n:"慶典",en:"Festival",cost:5,kind:"action",label:"行動",
+    txt:"+2 行動　+1 購買\n+$2"},
+  laboratory:{n:"實驗室",en:"Laboratory",cost:5,kind:"action",label:"行動",
+    txt:"+2 卡片　+1 行動"},
+  library:{n:"圖書館",en:"Library",cost:5,kind:"action",label:"行動",
+    txt:"抽到手牌達 7 張\n行動牌可放一旁\n結束後將其棄掉"},
+  market:{n:"市集",en:"Market",cost:5,kind:"action",label:"行動",
+    txt:"+1 卡片　+1 行動\n+1 購買　+$1"},
+  mine:{n:"礦坑",en:"Mine",cost:5,kind:"action",label:"行動",
+    txt:"廢除 1 張財寶\n換費用 +$3 內的\n財寶至手牌"},
+  witch:{n:"女巫",en:"Witch",cost:5,kind:"action",attack:true,label:"行動 · 攻擊",
+    txt:"+2 卡片\n其他玩家各獲得\n1 張詛咒"},
+
+  /* $6 */
+  adventurer:{n:"冒險者",en:"Adventurer",cost:6,kind:"action",label:"行動",
+    txt:"展示牌庫頂直到找出\n2 張財寶加入手牌，\n其餘棄掉"}
 };
 
-const KINGDOM = ["cellar","market","militia","mine","moat",
-                 "remodel","smithy","village","woodcutter","workshop"];
+/* ---------- 牌庫池與模組 ---------- */
+const ALL_KINGDOM = [
+  "cellar","chapel","moat",
+  "chancellor","village","woodcutter","workshop",
+  "bureaucrat","feast","gardens","militia","moneylender","remodel","smithy","spy","thief","throneroom",
+  "councilroom","festival","laboratory","library","market","mine","witch",
+  "adventurer"
+];
 const TREASURES = ["copper","silver","gold"];
 const VICTORIES = ["estate","duchy","province","curse"];
+
+const SETS = [
+  {id:"first", n:"新手模組", icon:"⚜", desc:"官方入門十張，規則單純好上手",
+   cards:["cellar","market","militia","mine","moat","remodel","smithy","village","woodcutter","workshop"]},
+  {id:"money", n:"有錢真好", icon:"💰", desc:"錢滾錢，經濟一路起飛",
+   cards:["adventurer","bureaucrat","chancellor","chapel","feast","laboratory","market","mine","moneylender","throneroom"]},
+  {id:"interact", n:"玩家互動", icon:"⚔", desc:"攻擊與反應交錯，互相牽制",
+   cards:["bureaucrat","chancellor","councilroom","festival","library","militia","moat","spy","thief","village"]},
+  {id:"distort", n:"價格失衡", icon:"⚖", desc:"牌組膨脹與精簡的極端拉鋸",
+   cards:["cellar","chapel","feast","gardens","library","thief","village","witch","woodcutter","workshop"]},
+  {id:"square", n:"小鎮廣場", icon:"🏘", desc:"村莊連鎖，行動接連不斷",
+   cards:["bureaucrat","cellar","festival","library","market","remodel","smithy","throneroom","village","woodcutter"]}
+];
+
+/* 依費用由低到高排序（同費用依英文名），供應區左上到右下 */
+function sortByCost(ids){
+  return ids.slice().sort((a,b)=> CARDS[a].cost-CARDS[b].cost || CARDS[a].en.localeCompare(CARDS[b].en));
+}
 
 /* 卡牌樣式類別 */
 function cardClass(id){
@@ -1156,18 +1543,21 @@ function cardClass(id){
   if(c.kind==="curse") return "t-curse";
   return "t-action";
 }
-const isAction   = id => CARDS[id].kind==="action";
-const isTreasure = id => CARDS[id].kind==="treasure";
-const isVictory  = id => CARDS[id].kind==="victory" || CARDS[id].kind==="curse";
-const costOf     = id => CARDS[id].cost;
+const isAction    = id => CARDS[id].kind==="action";
+const isTreasure  = id => CARDS[id].kind==="treasure";
+const isVictory   = id => CARDS[id].kind==="victory" || CARDS[id].kind==="curse";
+const isVicOnly   = id => CARDS[id].kind==="victory";      // 官員用（詛咒不算）
+const isAttack    = id => !!CARDS[id].attack;
+const costOf      = id => CARDS[id].cost;
+const buyable     = id => !CARDS[id].noBuy;
 
 /* ---------- AI 流派 ---------- */
 const STYLES = {
-  market:{n:"市場流",icon:"🏛",desc:"囤積市場與村莊，多抽多買滾雪球"},
+  market:{n:"市場流",icon:"🏛",desc:"囤積市集與村莊，多抽多買滾雪球"},
   money :{n:"金錢流",icon:"💰",desc:"只買錢幣，直線衝刺行省"},
-  engine:{n:"引擎流",icon:"⚙",desc:"村莊接鐵匠，串成抽牌連鎖"},
-  attack:{n:"攻擊流",icon:"⚔",desc:"民兵壓制，撕碎對手手牌"},
-  upgrade:{n:"升級流",icon:"🔨",desc:"改造與礦坑，把廢牌煉成寶物"}
+  engine:{n:"引擎流",icon:"⚙",desc:"村莊接抽牌，串成連鎖引擎"},
+  attack:{n:"攻擊流",icon:"⚔",desc:"攻擊牌壓制，撕碎對手節奏"},
+  upgrade:{n:"升級流",icon:"🔨",desc:"改造與精簡，把廢牌煉成寶物"}
 };
 const DIFFS = {
   1:{n:"簡單",tag:"新手"},
@@ -1180,13 +1570,11 @@ const DIFFS = {
    ===================================================================== */
 const G = {
   players:[], supply:{}, cur:0, phase:"action", trash:[],
-  over:false, log:[], fxNotes:[], busy:false
+  over:false, log:[], fxNotes:[], busy:false, aiDelay:1500
 };
 const $  = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 const sleep = ms => new Promise(r=>setTimeout(r,ms));
-let aiReactionSeconds = 1.5;
-const waitAiReaction = () => sleep(aiReactionSeconds * 1000);
 const SEAT_EL = ["#seatS","#seatW","#seatN","#seatE"];   // 玩家1下、2左、3上、4右
 const SEAT_NAME = ["南","西","北","東"];
 
@@ -1247,7 +1635,10 @@ function setupGame(cfg){
   G.players = []; G.supply = {}; G.trash = []; G.log = []; G.over=false;
   const n = cfg.count;
 
-  KINGDOM.forEach(id => G.supply[id] = 10);              // 10 種 × 10 張 = 100 張
+  G.kingdom = sortByCost(
+    (cfg.kingdom && cfg.kingdom.length===10) ? cfg.kingdom : SETS[0].cards);
+  G.setName = cfg.setName || "新手模組";
+  G.kingdom.forEach(id => G.supply[id] = 10);            // 10 種 × 10 張 = 100 張
   G.supply.copper   = 60 - 7*n;
   G.supply.silver   = 40;
   G.supply.gold     = 30;
@@ -1281,6 +1672,7 @@ function setupGame(cfg){
   G.phase = "action";
   logTurn("牌局開始");
   log(`⚜ ${n} 位領主入席，爭奪皇輿霸權`,null,"fx");
+  log(`本局牌組模組：<b>${G.setName}</b> — ${G.kingdom.map(k=>CARDS[k].n).join("、")}`,null,"fx");
   G.players.forEach(p=>{
     if(p.ai) log(`${p.name}（${DIFFS[p.diff].n}）採用 <b>${STYLES[p.style].n}</b>：${STYLES[p.style].desc}`,p.i);
   });
@@ -1311,7 +1703,19 @@ function gainCard(p,id,dest){
 function emptyPiles(){ return Object.keys(G.supply).filter(k=>G.supply[k]<=0); }
 function gameOver(){ return G.supply.province<=0 || emptyPiles().length>=3; }
 function scoreOf(p){
-  return allCards(p).reduce((s,id)=>s+(CARDS[id].vp||0),0);
+  const all=allCards(p), n=all.length;
+  let s=0;
+  for(const id of all) s += CARDS[id].gardens ? Math.floor(n/10) : (CARDS[id].vp||0);
+  return s;
+}
+/* 翻開牌庫頂一張（必要時洗牌），無牌可翻回傳 null */
+function revealTop(p){
+  if(!p.deck.length){
+    if(!p.disc.length) return null;
+    p.deck = shuffle(p.disc.slice()); p.disc=[];
+    log(`${p.name} 將棄牌堆洗回牌庫`,p.i);
+  }
+  return p.deck.pop();
 }
 
 /* =====================================================================
@@ -1328,7 +1732,9 @@ function renderSupply(){
     return cardHTML(id,{count:cnt,empty:cnt<=0,sel:pick,
       dim:(pending&&pending.kind==="supply"&&!pick&&cnt>0),key:id});
   };
-  $("#kingdomGrid").innerHTML = KINGDOM.map(pileHTML).join("");
+  $("#kingdomGrid").innerHTML = (G.kingdom||[]).map(pileHTML).join("");
+  const kt=$("#kingdomTtl");
+  if(kt && G.setName) kt.textContent = `${G.setName} · 十種共 100 張`;
   $("#treasureRow").innerHTML = TREASURES.map(pileHTML).join("");
   $("#victoryRow").innerHTML  = VICTORIES.map(pileHTML).join("");
 }
@@ -1341,7 +1747,7 @@ function pileMini(id,count,label){
 }
 function discMini(p){
   const top = p.disc[p.disc.length-1];
-  return `<div class="pileItem">
+  return `<div class="pileItem" data-discard-player="${p.i}">
     ${top?cardHTML(top,{size:"mini"}):`<div class="cardback" style="width:36px;height:47px;opacity:.25"></div>`}
     <div class="plabel">棄牌區</div><div class="pnum">${p.disc.length}</div></div>`;
 }
@@ -1352,8 +1758,10 @@ function seatBody(p,compact){
     ? `<span class="ptag ai">AI</span><span class="ptag style">${STYLES[p.style].icon} ${STYLES[p.style].n}</span><span class="ptag diff">${DIFFS[p.diff].n}</span>`
     : `<span class="ptag you">你</span>`;
   const stats = `
+    <div class="stat"><div class="sv">${p.deck.length}</div><div class="sl">牌庫</div></div>
+    <div class="stat"><div class="sv">${p.disc.length}</div><div class="sl">棄牌</div></div>
     <div class="stat"><div class="sv">${p.hand.length}</div><div class="sl">手牌</div></div>
-    <div class="stat"><div class="sv">${act && G.phase==="action" ? p.actions : 0}</div><div class="sl">剩餘行動</div></div>
+    <div class="stat"><div class="sv">${act?p.actions:0}</div><div class="sl">行動</div></div>
     <div class="stat gold"><div class="sv">$${act?p.coins:0}</div><div class="sl">金錢</div></div>`;
   const playCards = p.play.length
     ? p.play.map(id=>cardHTML(id,{size:"mini"})).join("")
@@ -1391,9 +1799,11 @@ function renderSeats(){
   $("#s0Head").innerHTML = `
     <div class="avatar">👑</div><div class="pname">${p.name}</div>
     <span class="ptag you">你</span><span class="ptag">南方</span>
-    <span class="ptag" style="margin-left:auto">${G.cur===0&&!G.over?"正在操作":"等待中"}</span>`;
+    <span class="ptag" style="margin-left:auto">第 ${p.turns} 回合</span>`;
   $("#s0Stats").innerHTML = `
-    <div class="stat"><div class="sv">${G.cur===0 && !G.over && G.phase==="action" ? p.actions : 0}</div><div class="sl">剩餘行動</div></div>
+    <div class="stat"><div class="sv">${p.deck.length}</div><div class="sl">牌庫</div></div>
+    <div class="stat"><div class="sv">${p.disc.length}</div><div class="sl">棄牌</div></div>
+    <div class="stat"><div class="sv">${G.cur===0&&!G.over?p.actions:0}</div><div class="sl">行動</div></div>
     <div class="stat gold"><div class="sv">$${G.cur===0?p.coins:0}</div><div class="sl">本回合金錢</div></div>`;
   $("#s0Piles").innerHTML = pileMini("x",p.deck.length,"牌庫")+discMini(p);
   $("#s0Play").innerHTML = p.play.length
@@ -1419,10 +1829,11 @@ function renderInfo(){
     el.classList.toggle("done", !G.over && order[ph]<order[G.phase]);
   });
   if(p){
-    $("#resAct").textContent  = !G.over && G.phase==="action" ? p.actions : 0;
+    $("#resAct").textContent  = p.actions;
     $("#resBuy").textContent  = p.buys;
     $("#resCoin").textContent = "$"+p.coins;
     $("#curName").textContent = p.name + (p.ai?`（${STYLES[p.style].n}）`:"");
+    $("#curTurn").textContent = p.turns;
   }
   $("#fxTicker").innerHTML = `<span class="fxT">本回合特效：</span>` +
     (G.fxNotes.length? G.fxNotes.join("；") : "—");
@@ -1431,7 +1842,7 @@ function renderInfo(){
     mp.textContent = G.supply.province;
     $("#msEmpty").textContent = emptyPiles().length;
     $("#msTrash").textContent = G.trash.length;
-    $("#msActions").textContent = !G.over && G.phase==="action" ? p.actions : 0;
+    $("#msRound").textContent = Math.max(...G.players.map(x=>x.turns));
   }
 }
 
@@ -1487,35 +1898,6 @@ function floatText(i,text,color){
   $("#fxLayer").appendChild(d);
   setTimeout(()=>d.remove(),1200);
 }
-async function purchaseFx(p,id){
-  const effect=document.createElement("div");
-  effect.className="purchaseFx";
-  const caption=document.createElement("div");
-  caption.className="purchaseCaption";
-  caption.textContent=`${p.name} 購買了 ${CARDS[id].n}`;
-  effect.appendChild(caption);
-  effect.insertAdjacentHTML("beforeend",cardHTML(id));
-  $("#fxLayer").appendChild(effect);
-  try{
-    await sleep(1500);
-    const target=document.querySelector(p.i===0?"#s0Piles .pileItem:last-child":`${SEAT_EL[p.i]} .zPiles .pileItem:last-child`);
-    const rect=target?.getBoundingClientRect();
-    const from=effect.getBoundingClientRect();
-    caption.textContent=`${p.name}：收入棄牌區`;
-    const visible=rect && rect.width>0 && rect.height>0 && rect.bottom>0 && rect.top<innerHeight;
-    const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if(visible && !reduced && effect.animate){
-      const dx=rect.left+rect.width/2-(from.left+from.width/2);
-      const dy=rect.top+rect.height/2-(from.top+from.height/2);
-      await effect.animate([
-        {transform:"translate(-50%,-50%) scale(1)",opacity:1},
-        {transform:`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(.22)`,opacity:.3}
-      ],{duration:420,easing:"ease-in-out",fill:"forwards"}).finished;
-    }else{
-      await sleep(300);
-    }
-  }finally{effect.remove();}
-}
 function attackFx(name,sub){
   const d=document.createElement("div");
   d.className="attackFx";
@@ -1562,6 +1944,38 @@ function moatFx(i){
       <span class="shieldTxt">護城河 · 免疫</span></div>`;
   $("#fxLayer").appendChild(d);
   setTimeout(()=>d.remove(),1500);
+}
+
+/* 購買牌展示：先在中央停留，再飛向買家的棄牌區 */
+async function purchaseFx(p,id){
+  const d=document.createElement("div");
+  d.className="purchaseFx";
+  d.innerHTML=`<div class="buyFxBuyer">${p.name} 購得</div>
+    ${cardHTML(id,{size:"buyFxCard"})}
+    <div class="buyFxStamp">購買</div>`;
+  $("#fxLayer").appendChild(d);
+
+  await sleep(850);
+  const target=document.querySelector(`[data-discard-player="${p.i}"]`);
+  if(!target){ d.remove(); return; }
+
+  const from=d.getBoundingClientRect();
+  const to=target.getBoundingClientRect();
+  const dx=(to.left+to.width/2)-(from.left+from.width/2);
+  const dy=(to.top+to.height/2)-(from.top+from.height/2);
+  const moving=d.animate([
+    {transform:"translate(-50%,-50%) scale(1) rotate(0deg)",opacity:1},
+    {transform:`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(.24) rotate(${p.i%2?8:-8}deg)`,opacity:.18}
+  ],{duration:350,easing:"cubic-bezier(.55,.02,.78,.35)",fill:"forwards"});
+  try{ await moving.finished; }catch(_e){}
+  d.remove();
+}
+
+function pulseDiscard(p){
+  const target=document.querySelector(`[data-discard-player="${p.i}"]`);
+  if(!target) return;
+  target.classList.add("receiveCard");
+  setTimeout(()=>target.classList.remove("receiveCard"),700);
 }
 
 /* =====================================================================
@@ -1619,6 +2033,21 @@ function pickDialog(o){
     $("#modalWrap").classList.add("on");
   });
 }
+function confirmDialog(o){
+  return new Promise(res=>{
+    $("#modalTtl").textContent=o.title;
+    $("#modalSub").innerHTML=o.sub||"";
+    $("#modalBody").innerHTML = o.card
+      ? cardHTML(o.card,{size:"hand"})
+      : (o.cards ? o.cards.map(c=>cardHTML(c,{size:"hand"})).join("") : "");
+    $("#modalBtns").innerHTML =
+      `<button class="btn primary" id="okBtn">${o.yes||"確定"}</button>`+
+      `<button class="btn" id="cancelBtn">${o.no||"取消"}</button>`;
+    $("#okBtn").onclick=()=>{ closeModal(); res(true); };
+    $("#cancelBtn").onclick=()=>{ closeModal(); res(false); };
+    $("#modalWrap").classList.add("on");
+  });
+}
 function closeModal(){ $("#modalWrap").classList.remove("on"); $("#modalBody").onclick=null; }
 
 function showPileDialog(p){
@@ -1661,6 +2090,21 @@ async function applyEffect(p,id){
     case "mine":       await mineEffect(p); break;
     case "remodel":    await remodelEffect(p); break;
     case "workshop":   await workshopEffect(p); break;
+    /* ---- 擴充卡 ---- */
+    case "chapel":      await chapelEffect(p); break;
+    case "chancellor":  await chancellorEffect(p); break;
+    case "bureaucrat":  await bureaucratEffect(p); break;
+    case "feast":       await feastEffect(p); break;
+    case "moneylender": await moneylenderEffect(p); break;
+    case "spy":         await spyEffect(p); break;
+    case "thief":       await thiefEffect(p); break;
+    case "throneroom":  await throneEffect(p); break;
+    case "councilroom": await councilRoomEffect(p); break;
+    case "festival":    p.actions+=2; p.buys++; p.coins+=2; break;
+    case "laboratory":  drawCards(p,2); p.actions++; break;
+    case "library":     await libraryEffect(p); break;
+    case "witch":       await witchEffect(p); break;
+    case "adventurer":  await adventurerEffect(p); break;
   }
   const gain=[];
   if(p.coins>before.c) gain.push(`+$${p.coins-before.c}`);
@@ -1675,7 +2119,7 @@ async function cellarEffect(p){
   else{
     const items=p.hand.map((id,ix)=>({id,key:ix}));
     idxs = await pickDialog({
-      title:"地下室 · 棄牌換牌",
+      title:"地窖 · 棄牌換牌",
       sub:"選擇要棄掉的手牌（可不選），棄幾張就再抽幾張",
       items, min:0, max:p.hand.length, okText:"確定棄牌"
     }) || [];
@@ -1686,7 +2130,7 @@ async function cellarEffect(p){
   idxs.forEach(ix=>{ names.push(CARDS[p.hand[ix]].n); p.disc.push(p.hand[ix]); p.hand.splice(ix,1); });
   const got=drawCards(p,idxs.length);
   log(`${p.name} 棄掉 ${names.join("、")}，重抽 ${got.length} 張`,p.i);
-  fxNote(`地下室：換掉 ${idxs.length} 張牌`);
+  fxNote(`地窖：換掉 ${idxs.length} 張牌`);
   render(); await sleep(p.ai?350:180);
 }
 
@@ -1726,12 +2170,12 @@ async function mineEffect(p){
 }
 
 async function remodelEffect(p){
-  if(!p.hand.length){ log(`${p.name} 手牌為空，改造無效`,p.i); return; }
+  if(!p.hand.length){ log(`${p.name} 手牌為空，重建無效`,p.i); return; }
   let pickIx;
   if(p.ai) pickIx = aiRemodelTrash(p);
   else{
     const r = await pickDialog({
-      title:"改造 · 廢除一張牌",
+      title:"重建 · 廢除一張牌",
       sub:"選一張手牌廢除，換取價格 +$2 以內的任意牌",
       items:p.hand.map((id,ix)=>({id,key:ix})), min:1, max:1, okText:"廢除它"
     });
@@ -1740,13 +2184,13 @@ async function remodelEffect(p){
   const tid=p.hand[pickIx];
   p.hand.splice(pickIx,1); G.trash.push(tid);
   const lim=costOf(tid)+2;
-  const opts=Object.keys(G.supply).filter(k=>G.supply[k]>0 && costOf(k)<=lim);
+  const opts=Object.keys(G.supply).filter(k=>G.supply[k]>0 && costOf(k)<=lim && buyable(k));
   if(!opts.length){ log(`${p.name} 廢除 ${CARDS[tid].n}，但無牌可換`,p.i); return; }
   let gid;
   if(p.ai) gid = aiPickGain(p,opts,lim);
   else{
     const r = await pickDialog({
-      title:"改造 · 獲得新牌",
+      title:"重建 · 獲得新牌",
       sub:`已廢除 <b>${CARDS[tid].n}</b>，可獲得價格 $${lim} 以內的牌`,
       items:opts.sort((a,b)=>costOf(b)-costOf(a)).map(t=>({id:t,key:t,count:G.supply[t]})),
       min:1, max:1, okText:"獲得"
@@ -1754,20 +2198,20 @@ async function remodelEffect(p){
     gid = r ? r[0] : opts[0];
   }
   gainCard(p,gid,"disc");
-  log(`${p.name} 改造 <b>${CARDS[tid].n}</b> → <b>${CARDS[gid].n}</b>`,p.i);
-  fxNote(`改造：${CARDS[tid].n} → ${CARDS[gid].n}`);
+  log(`${p.name} 重建 <b>${CARDS[tid].n}</b> → <b>${CARDS[gid].n}</b>`,p.i);
+  fxNote(`重建：${CARDS[tid].n} → ${CARDS[gid].n}`);
   floatText(p.i,`🔨 ${CARDS[gid].n}`);
   render(); await sleep(p.ai?400:180);
 }
 
 async function workshopEffect(p){
-  const opts=Object.keys(G.supply).filter(k=>G.supply[k]>0 && costOf(k)<=4);
-  if(!opts.length){ log(`${p.name} 工坊無牌可取`,p.i); return; }
+  const opts=Object.keys(G.supply).filter(k=>G.supply[k]>0 && costOf(k)<=4 && buyable(k));
+  if(!opts.length){ log(`${p.name} 工作室無牌可取`,p.i); return; }
   let gid;
   if(p.ai) gid = aiPickGain(p,opts,4);
   else{
     const r = await pickDialog({
-      title:"工坊 · 免費獲得",
+      title:"工作室 · 免費獲得",
       sub:"獲得一張價格 $4 以內的牌（放入棄牌堆）",
       items:opts.sort((a,b)=>costOf(b)-costOf(a)).map(t=>({id:t,key:t,count:G.supply[t]})),
       min:1, max:1, okText:"獲得"
@@ -1775,18 +2219,21 @@ async function workshopEffect(p){
     gid = r ? r[0] : opts[0];
   }
   gainCard(p,gid,"disc");
-  log(`${p.name} 於工坊打造出 <b>${CARDS[gid].n}</b>`,p.i);
-  fxNote(`工坊：獲得 ${CARDS[gid].n}`);
+  log(`${p.name} 於工作室打造出 <b>${CARDS[gid].n}</b>`,p.i);
+  fxNote(`工作室：獲得 ${CARDS[gid].n}`);
   floatText(p.i,`🛠 ${CARDS[gid].n}`);
   render(); await sleep(p.ai?400:180);
 }
 
 /* ---------- 民兵攻擊 ---------- */
-async function militiaAttack(att){
-  attackFx(att.name,"民　兵　突　襲");
-  log(`<b>${att.name}</b> 發動 <b>民兵</b>：其他玩家棄牌至剩 3 張！`,att.i,"fx");
-  fxNote("民兵全場攻擊");
+/* 共用：發動攻擊 → 播特效 → 回傳未被護城河擋下的目標 */
+async function runAttack(att,cardId){
+  const nm=CARDS[cardId].n;
+  attackFx(att.name,`${nm}突襲`);
+  log(`<b>${att.name}</b> 發動攻擊牌 <b>${nm}</b>！`,att.i,"fx");
+  fxNote(`${nm} 全場攻擊`);
   await sleep(950);
+  const targets=[];
   for(const p of G.players){
     if(p===att) continue;
     if(p.hand.includes("moat")){
@@ -1797,6 +2244,14 @@ async function militiaAttack(att){
       await sleep(1000);
       continue;
     }
+    targets.push(p);
+  }
+  return targets;
+}
+
+async function militiaAttack(att){
+  const targets = await runAttack(att,"militia");
+  for(const p of targets){
     const excess = p.hand.length-3;
     if(excess<=0){ log(`${p.name} 手牌僅 ${p.hand.length} 張，未受影響`,p.i); continue; }
     hitFx(p.i);
@@ -1806,7 +2261,7 @@ async function militiaAttack(att){
     if(p.ai) idxs = aiDiscardDown(p,excess);
     else{
       idxs = await pickDialog({
-        title:"遭受民兵攻擊！",
+        title:"遭受義勇軍攻擊！",
         sub:`必須棄掉 <b>${excess}</b> 張手牌（棄到剩 3 張）`,
         items:p.hand.map((id,ix)=>({id,key:ix})),
         min:excess, max:excess, okText:"棄牌"
@@ -1829,7 +2284,7 @@ async function startTurn(p){
   G.phase="action"; G.fxNotes=[];
   logTurn(`${p.name} · 第 ${p.turns} 回合`);
   log(`回合開始：行動 <b>1</b>　購買 <b>1</b>　金錢 <b>$0</b>　手牌 ${p.hand.length} 張`,p.i);
-  banner(`${p.name} · 行動 ${p.actions}`);
+  banner(`${p.name} · 第 ${p.turns} 回合`);
   render();
   await sleep(p.ai?700:520);
 }
@@ -1879,26 +2334,28 @@ async function humanBuyPhase(p){
   setTip(`<b>購買階段</b><br>金錢牌已自動打出並結算。<br>點擊中央供應區可購買的牌（金色外框）。<br>買完或不買，按「結束回合」。`);
   while(p.buys>0){
     const pick = await waitPick("supply",
-      (id)=>G.supply[id]>0 && costOf(id)<=p.coins,
+      (id)=>G.supply[id]>0 && costOf(id)<=p.coins && buyable(id),
       `購買階段：$${p.coins}　剩餘購買 ${p.buys} 次`);
     if(pick===null) break;
     await doBuy(p,pick);
-    render();
-    await sleep(200);
     if(gameOver()) break;
   }
 }
 
 async function doBuy(p,id){
-  if(!CARDS[id] || p.buys<1 || G.supply[id]<=0 || p.coins<costOf(id)) return;
+  if(!G.supply[id] || p.buys<=0 || p.coins<costOf(id) || !buyable(id)) return false;
   G.supply[id]--;
   p.buys--; p.coins-=costOf(id);
+  render();
+  await purchaseFx(p,id);
+  p.disc.push(id);
   log(`<b>${p.name}</b> 購買 <b>${CARDS[id].n}</b>（$${costOf(id)}），剩餘 $${p.coins}`,p.i);
   fxNote(`購得 ${CARDS[id].n}`);
-  render();
-  try{await purchaseFx(p,id);}
-  finally{p.disc.push(id);render();}
+  floatText(p.i,`🛒 ${CARDS[id].n}`);
   if(G.supply[id]<=0) log(`⚠ <b>${CARDS[id].n}</b> 牌堆已售罄`,null,"fx");
+  render();
+  pulseDiscard(p);
+  return true;
 }
 
 async function takeTurn(p){
@@ -1938,7 +2395,7 @@ function endGame(){
     ? "行省牌堆售罄，帝國版圖底定" : "三堆牌售罄，牌局告終";
   $("#modalBody").innerHTML = `<div style="width:100%" id="endBox">` + rows.map((r,ix)=>{
     const det=[];
-    ["province","duchy","estate","curse"].forEach(v=>{
+    ["province","duchy","estate","gardens","curse"].forEach(v=>{
       const c=countCard(r.p,v); if(c) det.push(`${CARDS[v].n}×${c}`);
     });
     return `<div class="scoreRow ${r.vp===best?"win":""}">
@@ -1956,42 +2413,360 @@ function endGame(){
 }
 
 /* =====================================================================
-   AI 決策
+   擴充卡牌效果
    ===================================================================== */
+async function chapelEffect(p){
+  if(!p.hand.length){ log(`${p.name} 手牌為空，禮拜堂無牌可廢`,p.i); return; }
+  let idxs;
+  if(p.ai) idxs = aiChapelPick(p);
+  else{
+    idxs = await pickDialog({
+      title:"禮拜堂 · 淨化牌組",
+      sub:"選擇最多 <b>4</b> 張手牌永久廢除（可不選）",
+      items:p.hand.map((id,ix)=>({id,key:ix})),
+      min:0, max:Math.min(4,p.hand.length), okText:"確定廢除"
+    }) || [];
+  }
+  if(!idxs.length){ log(`${p.name} 選擇不廢除任何牌`,p.i); return; }
+  idxs.sort((a,b)=>b-a);
+  const names=[];
+  idxs.forEach(ix=>{ names.push(CARDS[p.hand[ix]].n); G.trash.push(p.hand[ix]); p.hand.splice(ix,1); });
+  log(`${p.name} 於禮拜堂廢除 ${names.join("、")}`,p.i);
+  fxNote(`禮拜堂：廢除 ${idxs.length} 張`);
+  floatText(p.i,`✝ 廢除 ${idxs.length} 張`,"#dff0ff");
+  render(); await sleep(p.ai?350:180);
+}
+
+async function chancellorEffect(p){
+  p.coins += 2;
+  if(!p.deck.length){ log(`${p.name} 牌庫已空，大臣無須重整`,p.i); return; }
+  let yes;
+  if(p.ai) yes = aiChancellorDecide(p);
+  else yes = await confirmDialog({
+    title:"大臣 · 重整牌庫",
+    sub:`是否把牌庫剩下的 <b>${p.deck.length}</b> 張全部放入棄牌堆？<br>（下次抽牌時會整副重新洗牌）`,
+    yes:"全部放入棄牌堆", no:"保持原樣"});
+  if(yes){
+    const n=p.deck.length;
+    p.disc.push(...p.deck); p.deck=[];
+    log(`${p.name} 將牌庫 ${n} 張全部放入棄牌堆`,p.i);
+    fxNote("大臣：重整牌庫");
+    floatText(p.i,`♻ 重整 ${n} 張`);
+  }else log(`${p.name} 保留原本的牌庫`,p.i);
+  render(); await sleep(p.ai?320:160);
+}
+
+async function moneylenderEffect(p){
+  const ix = p.hand.indexOf("copper");
+  if(ix<0){ log(`${p.name} 手上沒有銅幣，錢莊無效`,p.i); return; }
+  let ok = true;
+  if(!p.ai) ok = await confirmDialog({
+    title:"錢莊 · 熔銅換金",
+    sub:"廢除手中 1 張銅幣，換取 <b>+$3</b>？",
+    yes:"廢除銅幣 +$3", no:"不廢除", card:"copper"});
+  if(!ok){ log(`${p.name} 放棄熔銅`,p.i); return; }
+  p.hand.splice(ix,1); G.trash.push("copper"); p.coins += 3;
+  log(`${p.name} 熔掉 1 張銅幣，獲得 <b>+$3</b>`,p.i);
+  fxNote("錢莊：銅幣 → $3");
+  render(); await sleep(p.ai?320:160);
+}
+
+async function feastEffect(p){
+  const ix = p.play.lastIndexOf("feast");
+  if(ix>=0){ p.play.splice(ix,1); G.trash.push("feast"); log(`${p.name} 廢除了這張晚宴`,p.i); }
+  const opts = Object.keys(G.supply).filter(k=>G.supply[k]>0 && costOf(k)<=5 && buyable(k));
+  if(!opts.length){ log(`晚宴無牌可取`,p.i); return; }
+  let gid;
+  if(p.ai) gid = aiPickGain(p,opts,5);
+  else{
+    const r = await pickDialog({
+      title:"晚宴 · 盛宴之賜",
+      sub:"獲得一張費用 <b>$5 以內</b>的牌（放入棄牌堆）",
+      items:opts.sort((a,b)=>costOf(b)-costOf(a)).map(t=>({id:t,key:t,count:G.supply[t]})),
+      min:1,max:1,okText:"獲得"});
+    gid = r ? r[0] : opts[0];
+  }
+  gainCard(p,gid,"disc");
+  log(`${p.name} 以晚宴換得 <b>${CARDS[gid].n}</b>`,p.i);
+  fxNote(`晚宴：獲得 ${CARDS[gid].n}`);
+  floatText(p.i,`🍖 ${CARDS[gid].n}`);
+  render(); await sleep(p.ai?380:180);
+}
+
+async function throneEffect(p){
+  const acts = p.hand.map((id,ix)=>({id,ix})).filter(o=>isAction(o.id));
+  if(!acts.length){ log(`${p.name} 手上沒有其他行動牌，王座落空`,p.i); return; }
+  let ix;
+  if(p.ai) ix = aiThronePick(p,acts);
+  else{
+    const r = await pickDialog({
+      title:"王座 · 連續執行兩次",
+      sub:"選擇一張手中的行動牌，它將被<b>連續執行兩次</b>（不額外消耗行動）",
+      items:acts.map(o=>({id:o.id,key:o.ix})), min:1,max:1,okText:"執行兩次"});
+    ix = r ? r[0] : acts[0].ix;
+  }
+  const id = p.hand[ix];
+  p.hand.splice(ix,1); p.play.push(id);
+  log(`<b>${p.name}</b> 以王座連打 <b>${CARDS[id].n}</b> 兩次`,p.i,"fx");
+  fxNote(`王座 → ${CARDS[id].n} ×2`);
+  floatText(p.i,`👑 ${CARDS[id].n} ×2`);
+  render(); await sleep(p.ai?380:260);
+  log(`（王座 第 1 次）${CARDS[id].n}`,p.i);
+  await applyEffect(p,id);
+  render(); await sleep(p.ai?380:260);
+  log(`（王座 第 2 次）${CARDS[id].n}`,p.i);
+  await applyEffect(p,id);
+}
+
+async function councilRoomEffect(p){
+  drawCards(p,4); p.buys++;
+  for(const o of G.players){
+    if(o===p) continue;
+    const g = drawCards(o,1);
+    if(g.length){ log(`${o.name} 因議事廳多抽 1 張牌`,o.i); floatText(o.i,"+1 卡片","#bfe3ff"); }
+  }
+  fxNote("議事廳：全體抽牌");
+  render(); await sleep(p.ai?360:220);
+}
+
+async function libraryEffect(p){
+  const aside=[];
+  let guard=0;
+  while(p.hand.length<7 && guard++<40){
+    const c = revealTop(p);
+    if(c===null) break;
+    if(isAction(c)){
+      let skip;
+      if(p.ai) skip = aiLibrarySkip(p,c);
+      else skip = await confirmDialog({
+        title:"圖書館 · 抽到行動牌",
+        sub:`翻到 <b>${CARDS[c].n}</b>。要放到一旁（結束後棄掉）還是收進手牌？`,
+        yes:"放到一旁", no:"收進手牌", card:c});
+      if(skip){ aside.push(c); continue; }
+    }
+    p.hand.push(c);
+    render(); await sleep(p.ai?90:70);
+  }
+  if(aside.length){
+    p.disc.push(...aside);
+    log(`${p.name} 放到一旁並棄掉 ${aside.map(c=>CARDS[c].n).join("、")}`,p.i);
+  }
+  log(`${p.name} 以圖書館補到手牌 <b>${p.hand.length}</b> 張`,p.i);
+  fxNote(`圖書館：補到 ${p.hand.length} 張`);
+  render(); await sleep(p.ai?300:180);
+}
+
+async function adventurerEffect(p){
+  const found=[], rest=[];
+  let guard=0;
+  while(found.length<2 && guard++<80){
+    const c = revealTop(p);
+    if(c===null) break;
+    if(isTreasure(c)) found.push(c); else rest.push(c);
+  }
+  p.hand.push(...found);
+  p.disc.push(...rest);
+  log(`${p.name} 冒險者翻出 <b>${found.map(c=>CARDS[c].n).join("、")||"無"}</b>，棄掉 ${rest.length} 張`,p.i);
+  fxNote(`冒險者：找到 ${found.length} 張財寶`);
+  if(found.length) floatText(p.i,`🧭 ${found.map(c=>CARDS[c].n).join(" ")}`);
+  render(); await sleep(p.ai?380:220);
+}
+
+async function witchEffect(p){
+  drawCards(p,2);
+  render();
+  const targets = await runAttack(p,"witch");
+  for(const t of targets){
+    if(G.supply.curse>0){
+      gainCard(t,"curse","disc");
+      hitFx(t.i); floatText(t.i,"☠ +1 詛咒","#d9a6ff");
+      log(`${t.name} 被塞了 1 張 <b>詛咒</b>（詛咒剩 ${G.supply.curse}）`,t.i);
+    }else{
+      log(`詛咒牌堆已空，${t.name} 逃過一劫`,t.i);
+    }
+    render(); await sleep(430);
+  }
+}
+
+async function bureaucratEffect(p){
+  if(G.supply.silver>0){
+    gainCard(p,"silver","deck");
+    log(`${p.name} 獲得 1 張銀幣，置於自己的牌庫頂`,p.i);
+    floatText(p.i,"↑ 銀幣");
+  }else log(`銀幣牌堆已空`,p.i);
+  render();
+  const targets = await runAttack(p,"bureaucrat");
+  for(const t of targets){
+    const vics = t.hand.map((id,ix)=>({id,ix})).filter(o=>isVicOnly(o.id));
+    if(!vics.length){
+      log(`${t.name} 展示手牌：沒有勝利點牌，逃過一劫`,t.i);
+      render(); await sleep(360); continue;
+    }
+    let ix;
+    if(t.ai) ix = vics.slice().sort((a,b)=>costOf(a.id)-costOf(b.id))[0].ix;
+    else{
+      const r = await pickDialog({
+        title:"官員的命令",
+        sub:"你必須從手牌選 1 張<b>勝利點牌</b>放回自己的牌庫頂",
+        items:vics.map(o=>({id:o.id,key:o.ix})), min:1,max:1,okText:"放回牌庫頂"});
+      ix = r ? r[0] : vics[0].ix;
+    }
+    const cid = t.hand[ix];
+    t.hand.splice(ix,1); t.deck.push(cid);
+    hitFx(t.i); floatText(t.i,`↑ ${CARDS[cid].n}`,"#ff9d9d");
+    log(`${t.name} 被迫把 <b>${CARDS[cid].n}</b> 放回牌庫頂`,t.i);
+    render(); await sleep(430);
+  }
+}
+
+async function spyEffect(p){
+  drawCards(p,1); p.actions++;
+  render();
+  const targets = await runAttack(p,"spy");
+  for(const t of [p,...targets]){
+    const c = revealTop(t);
+    if(c===null){ log(`${t.name} 牌庫與棄牌堆皆空，無牌可翻`,t.i); continue; }
+    const self = (t===p);
+    let discard;
+    if(p.ai) discard = aiSpyDecide(self,c);
+    else discard = await confirmDialog({
+      title:`間諜 · ${self?"你自己":t.name} 的牌庫頂`,
+      sub:`翻出 <b>${CARDS[c].n}</b>。要讓${self?"自己":"對方"}把它棄掉，還是放回牌庫頂？`,
+      yes:"棄掉", no:"放回牌庫頂", card:c});
+    if(discard){ t.disc.push(c); log(`${t.name} 的 ${CARDS[c].n} 被棄掉`,t.i); }
+    else{ t.deck.push(c); log(`${t.name} 的 ${CARDS[c].n} 留在牌庫頂`,t.i); }
+    if(!self) hitFx(t.i);
+    render(); await sleep(p.ai?300:200);
+  }
+  fxNote("間諜：窺探牌庫頂");
+}
+
+async function thiefEffect(p){
+  const targets = await runAttack(p,"thief");
+  for(const t of targets){
+    const rev=[];
+    for(let k=0;k<2;k++){ const c=revealTop(t); if(c!==null) rev.push(c); }
+    if(!rev.length){ log(`${t.name} 無牌可展示`,t.i); continue; }
+    log(`${t.name} 展示牌庫頂：${rev.map(c=>CARDS[c].n).join("、")}`,t.i);
+    const tre = rev.map((id,k)=>({id,k})).filter(o=>isTreasure(o.id));
+    if(!tre.length){
+      t.disc.push(...rev);
+      log(`其中沒有財寶，全數棄掉`,t.i);
+      render(); await sleep(420); continue;
+    }
+    let k;
+    if(p.ai) k = tre.slice().sort((a,b)=>costOf(b.id)-costOf(a.id))[0].k;
+    else{
+      const r = await pickDialog({
+        title:`小偷 · 洗劫 ${t.name}`,
+        sub:"選擇 1 張財寶廢除，其餘展示牌棄掉",
+        items:tre.map(o=>({id:o.id,key:o.k})), min:1,max:1,okText:"廢除這張"});
+      k = r ? r[0] : tre[0].k;
+    }
+    const stolen = rev[k];
+    rev.splice(k,1);
+    t.disc.push(...rev);
+    let take = true;
+    if(!p.ai) take = await confirmDialog({
+      title:"據為己有？",
+      sub:`要把 <b>${CARDS[stolen].n}</b> 收進自己的棄牌堆嗎？`,
+      yes:"收下", no:"直接廢除", card:stolen});
+    if(take){
+      p.disc.push(stolen);
+      log(`${p.name} 偷走了 ${t.name} 的 <b>${CARDS[stolen].n}</b>`,p.i,"fx");
+      floatText(p.i,`🗝 ${CARDS[stolen].n}`);
+    }else{
+      G.trash.push(stolen);
+      log(`${p.name} 直接廢除了 ${t.name} 的 ${CARDS[stolen].n}`,p.i);
+    }
+    hitFx(t.i);
+    render(); await sleep(460);
+  }
+  fxNote("小偷：洗劫財寶");
+}
+
+/* =====================================================================
+   AI 決策（與當局牌組無關，會自動適應任何十張組合）
+   ===================================================================== */
+/* 終端牌：打出後不再有行動次數 */
+const TERMINAL = new Set(["smithy","councilroom","library","militia","witch","thief","bureaucrat",
+  "moneylender","mine","remodel","chapel","feast","workshop","woodcutter","chancellor",
+  "adventurer","moat","throneroom"]);
+/* 續行牌：至少 +1 行動 */
+const CANTRIP = ["village","festival","laboratory","market","spy"];
+
 const keepValue = id => {
   if(id==="curse") return 0;
+  if(CARDS[id].gardens) return 1.5;
   if(isVictory(id)) return 1;
   if(id==="copper") return 3;
   if(id==="silver") return 6;
   if(id==="gold")   return 9;
-  return 5 + costOf(id)*0.35;          // 行動牌
+  return 5 + costOf(id)*0.35;
 };
+
+/* 各流派購買偏好（由優先到次要） */
+const BUY_PREF = {
+  money  : ["gold","silver"],
+  market : ["gold","market","festival","laboratory","councilroom","village","woodcutter","silver","smithy"],
+  engine : ["gold","laboratory","market","councilroom","festival","smithy","library","village","silver"],
+  attack : ["gold","witch","militia","market","festival","thief","spy","bureaucrat","silver","smithy"],
+  upgrade: ["gold","mine","market","remodel","moneylender","chapel","throneroom","workshop","feast","silver"]
+};
+/* 任何流派都可接受的通用備援（讓 AI 適應任意十張組合；金錢流除外） */
+const GENERIC_TAIL = ["gold","laboratory","market","festival","councilroom","witch","militia",
+  "library","smithy","throneroom","mine","remodel","adventurer","spy","bureaucrat","thief",
+  "moneylender","feast","workshop","village","woodcutter","chancellor","cellar","chapel","silver"];
+function buyPrefOf(p){
+  const base = BUY_PREF[p.style] || BUY_PREF.money;
+  return p.style==="money" ? base : base.concat(GENERIC_TAIL);
+}
+
+/* 各流派打牌偏好（終端牌） */
+const TERM_PREF = {
+  attack : ["witch","militia","thief","bureaucrat","councilroom","smithy","library","mine","remodel","moneylender","adventurer","feast","workshop","woodcutter","chancellor","chapel","moat"],
+  engine : ["councilroom","smithy","library","witch","militia","adventurer","mine","remodel","moneylender","feast","workshop","woodcutter","bureaucrat","thief","chancellor","chapel","moat"],
+  upgrade: ["mine","remodel","moneylender","chapel","feast","workshop","smithy","library","councilroom","witch","militia","adventurer","bureaucrat","thief","chancellor","woodcutter","moat"],
+  market : ["smithy","councilroom","library","woodcutter","witch","militia","mine","remodel","adventurer","feast","workshop","moneylender","bureaucrat","thief","chancellor","chapel","moat"],
+  money  : ["adventurer","smithy","councilroom","library","militia","witch","moneylender","mine","woodcutter","remodel","feast","workshop","bureaucrat","thief","chancellor","chapel","moat"]
+};
+/* AI 想持有的張數上限 */
+const AI_LIMIT = {
+  chapel:1, moneylender:1, thief:1, chancellor:1, adventurer:2, throneroom:2,
+  witch:2, militia:2, spy:2, bureaucrat:2, mine:2, remodel:2, workshop:2, feast:2,
+  smithy:2, councilroom:2, library:2, cellar:2, moat:2, woodcutter:2,
+  village:5, festival:4, laboratory:5, market:5, gardens:8
+};
+function limitOf(p,id){
+  if(id==="gold"||id==="silver") return 99;
+  const base = AI_LIMIT[id]!=null ? AI_LIMIT[id] : 2;
+  return p.diff>=3 ? base : base+1;
+}
+const countTerminals = p => allCards(p).filter(id=>TERMINAL.has(id)).length;
+const countVillages  = p => allCards(p).filter(id=>CANTRIP.includes(id)).length;
 
 /* ---------- 行動階段：選一張要打的牌 ---------- */
 function aiActionPick(p){
   const ix = id => p.hand.indexOf(id);
-  if(p.diff===1 && Math.random()<0.22){                 // 簡單 AI 偶爾亂打
+  if(p.diff===1 && Math.random()<0.22){
     const list=[]; p.hand.forEach((id,i)=>{ if(isAction(id)) list.push(i); });
     if(list.length) return rnd(list);
   }
-  // 不消耗行動的牌優先
-  if(ix("village")>=0) return ix("village");
-  if(ix("market") >=0) return ix("market");
-  if(ix("cellar") >=0 && aiCellarPick(p).length>0) return ix("cellar");
-
-  const pref = {
-    attack :["militia","smithy","mine","remodel","woodcutter","workshop","moat"],
-    engine :["smithy","militia","mine","remodel","woodcutter","workshop","moat"],
-    upgrade:["mine","remodel","smithy","militia","workshop","woodcutter","moat"],
-    market :["smithy","militia","woodcutter","mine","remodel","workshop","moat"],
-    money  :["smithy","militia","woodcutter","mine","remodel","workshop","moat"]
-  }[p.style] || ["smithy","militia","woodcutter","moat"];
-
+  /* 1. 續行牌優先 */
+  for(const id of CANTRIP) if(ix(id)>=0) return ix(id);
+  if(ix("cellar")>=0 && aiCellarPick(p).length>0) return ix("cellar");
+  /* 2. 王座（手上還有別的行動牌才划算） */
+  if(ix("throneroom")>=0 && p.hand.some((c,i)=>isAction(c) && c!=="throneroom")) return ix("throneroom");
+  /* 3. 終端牌 */
+  const pref = TERM_PREF[p.style] || TERM_PREF.money;
   for(const id of pref){
     const i=ix(id); if(i<0) continue;
-    if(id==="mine"    && !p.hand.some(isTreasure)) continue;
-    if(id==="remodel" && p.hand.length<2) continue;
-    if(id==="moat"    && p.diff>=2 && p.hand.length<=2) continue;
+    if(id==="mine"        && !p.hand.some(isTreasure)) continue;
+    if(id==="moneylender" && !p.hand.includes("copper")) continue;
+    if(id==="remodel"     && p.hand.length<2) continue;
+    if(id==="chapel"      && aiChapelPick(p).length===0) continue;
+    if(id==="library"     && p.hand.length>=7) continue;
+    if(id==="moat"        && p.diff>=2 && p.hand.length<=2) continue;
     return i;
   }
   if(ix("cellar")>=0) return ix("cellar");
@@ -2001,86 +2776,88 @@ function aiActionPick(p){
 /* ---------- 購買階段：選一張要買的牌 ---------- */
 function aiBuyPick(p){
   const c=p.coins, S=G.supply, dif=p.diff;
-  const can = id => S[id]>0 && costOf(id)<=c;
+  const can = id => S[id]>0 && costOf(id)<=c && buyable(id);
   const n   = id => countCard(p,id);
-  const prov = S.province;
-  const total = allCards(p).length;
+  const prov = S.province, total = allCards(p).length;
 
-  if(dif===1 && Math.random()<0.28){                    // 簡單 AI 隨性亂買
-    const pool=Object.keys(S).filter(id=>can(id)&&id!=="curse");
+  if(dif===1 && Math.random()<0.28){
+    const pool=Object.keys(S).filter(id=>can(id));
     if(pool.length) return rnd(pool);
   }
   if(can("province")) return "province";
+
   const duchyGate = dif>=3 ? 5 : dif===2 ? 4 : 3;
   if(prov<=duchyGate && can("duchy")) return "duchy";
   if(prov<=(dif>=3?3:2) && can("estate")) return "estate";
+  /* 花園：牌組肥大時很划算 */
+  if(can("gardens") && total>=18 && (prov<=8 || total>=26) && n("gardens")<limitOf(p,"gardens"))
+    return "gardens";
 
-  switch(p.style){
-    case "money":
-      if(can("gold"))            return "gold";
-      if(c>=3 && can("silver"))  return "silver";
-      return null;
+  const terms = countTerminals(p), vils = countVillages(p);
+  const termCap = vils + (dif>=3 ? 1 : 2);
 
-    case "market":
-      if(c>=6 && can("gold"))    return "gold";
-      if(c>=5 && can("market"))  return "market";
-      if(c===4){
-        if(n("smithy")<2 && can("smithy")) return "smithy";
-        if(can("silver")) return "silver";
-      }
-      if(c===3){
-        if(n("village")<3 && can("village")) return "village";
-        if(can("silver")) return "silver";
-      }
-      return c>=3 && can("silver") ? "silver" : null;
-
-    case "engine":{
-      if(c>=6 && can("gold")) return "gold";
-      if(c>=5 && n("market")<2 && can("market")) return "market";
-      if(c===4 || c===5){
-        const lim = 1 + Math.floor(total/13);
-        if(n("smithy")<lim && can("smithy")) return "smithy";
-      }
-      if(c===3){
-        if(n("village") < n("smithy")*2+1 && can("village")) return "village";
-      }
-      return c>=3 && can("silver") ? "silver" : null;
-    }
-
-    case "attack":
-      if(c>=6 && can("gold")) return "gold";
-      if(c>=4 && n("militia")<(dif>=3?2:3) && can("militia")) return "militia";
-      if(c>=5 && can("market")) return "market";
-      if(c===4 && n("smithy")<1 && can("smithy")) return "smithy";
-      return c>=3 && can("silver") ? "silver" : null;
-
-    case "upgrade":
-      if(c>=6 && can("gold")) return "gold";
-      if(c===5){
-        if(n("mine")<2 && can("mine")) return "mine";
-        if(can("market")) return "market";
-      }
-      if(c===4){
-        if(n("remodel")<2 && can("remodel")) return "remodel";
-        if(n("smithy")<1 && can("smithy"))   return "smithy";
-      }
-      if(c===3){
-        if(n("workshop")<2 && can("workshop")) return "workshop";
-      }
-      return c>=3 && can("silver") ? "silver" : null;
+  const pref = buyPrefOf(p);
+  for(const id of pref){
+    if(!can(id)) continue;
+    if(n(id) >= limitOf(p,id)) continue;
+    if(TERMINAL.has(id) && terms >= termCap) continue;
+    return id;
   }
-  return c>=3 && can("silver") ? "silver" : null;
+  if(can("gold")) return "gold";
+  if(c>=3 && can("silver")) return "silver";
+  return null;
 }
 
 /* ---------- 效果選擇 ---------- */
 function aiCellarPick(p){
   const out=[];
-  p.hand.forEach((id,ix)=>{ if(isVictory(id)) out.push(ix); });
+  p.hand.forEach((id,ix)=>{ if(isVictory(id) && !CARDS[id].gardens) out.push(ix); });
+  p.hand.forEach((id,ix)=>{ if(CARDS[id].gardens) out.push(ix); });
   if(p.diff>=2){
     const cop=[]; p.hand.forEach((id,ix)=>{ if(id==="copper") cop.push(ix); });
     if(cop.length>3) out.push(...cop.slice(3));
   }
   return out;
+}
+function aiChapelPick(p){
+  const out=[];
+  const coppers = countCard(p,"copper");
+  let copBudget = Math.max(0, coppers-4);
+  p.hand.forEach((id,ix)=>{
+    if(out.length>=4) return;
+    if(id==="curse") out.push(ix);
+    else if(id==="estate" && G.supply.province>4) out.push(ix);
+  });
+  p.hand.forEach((id,ix)=>{
+    if(out.length>=4 || copBudget<=0) return;
+    if(id==="copper" && !out.includes(ix)){ out.push(ix); copBudget--; }
+  });
+  return out;
+}
+function aiChancellorDecide(p){
+  return p.disc.length>=5 && p.disc.length>=p.deck.length;
+}
+function aiThronePick(p,acts){
+  const order=["witch","militia","councilroom","smithy","laboratory","library","market","festival",
+               "mine","remodel","adventurer","bureaucrat","thief","spy","moneylender","feast",
+               "workshop","woodcutter","village","chancellor","cellar","chapel","moat"];
+  for(const id of order){
+    const o = acts.find(a=>a.id===id && a.id!=="throneroom");
+    if(!o) continue;
+    if(id==="mine" && !p.hand.some(isTreasure)) continue;
+    if(id==="moneylender" && !p.hand.includes("copper")) continue;
+    return o.ix;
+  }
+  return acts[0].ix;
+}
+function aiLibrarySkip(p,c){
+  if(TERMINAL.has(c) && p.actions<=0) return true;      // 打不出來的終端牌，放一旁
+  if(c==="moat") return false;
+  return false;
+}
+function aiSpyDecide(self,c){
+  const junk = isVictory(c);
+  return self ? junk : !junk;   // 自己丟廢牌；對手則丟掉好牌
 }
 function aiMineTrash(p,tre){
   const s=tre.find(o=>o.id==="silver");
@@ -2107,49 +2884,50 @@ function aiPickGain(p,opts,lim){
   if(G.supply.province<=4){
     for(const v of ["province","duchy","estate"]) if(opts.includes(v)) return v;
   }
-  const pref = {
-    market :["market","gold","village","silver","smithy","woodcutter"],
-    money  :["gold","silver"],
-    engine :["gold","market","smithy","village","silver"],
-    attack :["gold","militia","market","silver","smithy"],
-    upgrade:["gold","mine","market","remodel","silver","workshop"]
-  }[p.style] || ["gold","silver"];
+  const pref = buyPrefOf(p).concat(GENERIC_TAIL);
+  for(const id of pref) if(opts.includes(id) && countCard(p,id)<limitOf(p,id)) return id;
   for(const id of pref) if(opts.includes(id)) return id;
-  const rest = opts.filter(id=>id!=="curse" && !isVictory(id))
-                   .sort((a,b)=>costOf(b)-costOf(a));
+  const rest = opts.filter(id=>!isVictory(id)).sort((a,b)=>costOf(b)-costOf(a));
   return rest[0] || opts[0];
 }
 function aiDiscardDown(p,excess){
-  const order = p.hand.map((id,ix)=>({ix,v:keepValue(id)}))
-                      .sort((a,b)=>a.v-b.v);
+  const order = p.hand.map((id,ix)=>({ix,v:keepValue(id)})).sort((a,b)=>a.v-b.v);
   return order.slice(0,excess).map(o=>o.ix);
 }
 
 /* ---------- AI 階段 ---------- */
+function aiThinkPause(){ return sleep(G.aiDelay); }
+
 async function aiActionPhase(p){
-  while(p.actions>0){
+  let guard=0;
+  while(p.actions>0 && guard++<30){
     const ix=aiActionPick(p);
     if(ix<0) break;
-    await waitAiReaction();
+    await aiThinkPause();
     await playActionCard(p,ix);
   }
 }
 async function aiBuyPhase(p){
-  while(p.buys>0){
-    await waitAiReaction();
+  let guard=0;
+  while(p.buys>0 && guard++<12){
+    await aiThinkPause();
     const id=aiBuyPick(p);
     if(!id){ log(`${p.name} 保留 $${p.coins}，放棄購買`,p.i); break; }
     await doBuy(p,id);
-    render();
     if(gameOver()) break;
   }
 }
 
 /* =====================================================================
-   事件與初始化
+   開始畫面：人數 / 難度 / 牌組模組 / 自訂與我的最愛
    ===================================================================== */
 const AI_NAMES = ["翠羽女爵","赤鷹公爵","蒼狼騎士"];
-const cfg = { count:3, name:"領主", diffs:[2,2,2], first:0, aiNames:AI_NAMES };
+const cfg = {
+  count:3, name:"領主", diffs:[2,2,2], first:0, firstMode:"me", aiNames:AI_NAMES,
+  setId:"first", setName:"新手模組", kingdom:SETS[0].cards.slice()
+};
+const FAVS = [];              // 本次遊玩期間的「我的最愛」
+let customPick = [];          // 自訂勾選中的十張
 
 function renderAiSetup(){
   $("#aiSetup").innerHTML = Array.from({length:cfg.count-1},(_,k)=>`
@@ -2159,6 +2937,50 @@ function renderAiSetup(){
         ${[1,2,3].map(d=>`<div class="chip ${cfg.diffs[k]===d?"on":""}" data-d="${d}">${DIFFS[d].n}</div>`).join("")}
       </div>
     </div>`).join("");
+}
+
+function renderSetChips(){
+  const chips = SETS.map(s=>
+    `<div class="chip ${cfg.setId===s.id?"on":""}" data-set="${s.id}">${s.icon} ${s.n}</div>`).join("")
+    + FAVS.map((f,i)=>
+    `<div class="chip favChip ${cfg.setId==="fav"+i?"on":""}" data-set="fav${i}">★ ${f.n}<span class="del" data-del="${i}">✕</span></div>`).join("")
+    + `<div class="chip ${cfg.setId==="custom"?"on":""}" data-set="custom">✎ 自訂</div>`;
+  $("#setChips").innerHTML = chips;
+  renderSetPreview();
+}
+
+function setCardsOf(id){
+  if(id==="custom") return customPick.slice();
+  if(id.startsWith("fav")) return (FAVS[+id.slice(3)]||{cards:[]}).cards.slice();
+  const s = SETS.find(x=>x.id===id);
+  return s ? s.cards.slice() : SETS[0].cards.slice();
+}
+function setNameOf(id){
+  if(id==="custom") return "自訂牌組";
+  if(id.startsWith("fav")) return (FAVS[+id.slice(3)]||{n:"我的最愛"}).n;
+  const s = SETS.find(x=>x.id===id);
+  return s ? s.n : "新手模組";
+}
+
+function renderSetPreview(){
+  const ids = sortByCost(setCardsOf(cfg.setId));
+  const s = SETS.find(x=>x.id===cfg.setId);
+  const desc = s ? s.desc : (cfg.setId==="custom" ? "自由挑選十張王國牌" : "你收藏的組合");
+  const body = ids.length
+    ? ids.map(id=>`<b>${CARDS[id].n}</b>$${costOf(id)}`).join("　")
+    : "<i>尚未選滿十張</i>";
+  $("#setPreview").innerHTML =
+    `<div style="margin-bottom:3px">${desc}　·　共 ${ids.length} 種、每種 10 張</div>${body}`;
+}
+
+function renderCustomGrid(){
+  $("#cpGrid").innerHTML = sortByCost(ALL_KINGDOM).map(id=>`
+    <div class="cpItem ${customPick.includes(id)?"on":""}" data-k="${id}">
+      <span class="cpC">${costOf(id)}</span>
+      <span class="cpArt">${ART[id]}</span>
+      <span class="cpN">${CARDS[id].n}</span>
+    </div>`).join("");
+  $("#cpCount").textContent = customPick.length;
 }
 
 function bindStart(){
@@ -2179,7 +3001,56 @@ function bindStart(){
     cfg.diffs[k]=+c.dataset.d;
     Array.from(c.parentElement.children).forEach(x=>x.classList.toggle("on",x===c));
   };
+
+  /* 牌組模組 */
+  $("#setChips").onclick = e=>{
+    const del = e.target.closest("[data-del]");
+    if(del){
+      const i=+del.dataset.del;
+      FAVS.splice(i,1);
+      if(cfg.setId==="fav"+i){ cfg.setId="first"; }
+      renderSetChips();
+      return;
+    }
+    const c=e.target.closest(".chip"); if(!c) return;
+    cfg.setId=c.dataset.set;
+    $("#customPanel").style.display = cfg.setId==="custom" ? "block" : "none";
+    if(cfg.setId==="custom") renderCustomGrid();
+    renderSetChips();
+  };
+  $("#cpGrid").onclick = e=>{
+    const it=e.target.closest(".cpItem"); if(!it) return;
+    const id=it.dataset.k;
+    const i=customPick.indexOf(id);
+    if(i>=0) customPick.splice(i,1);
+    else{
+      if(customPick.length>=10){ flashMsg("最多只能選 10 張，請先取消其他卡牌"); return; }
+      customPick.push(id);
+    }
+    renderCustomGrid();
+    renderSetPreview();
+  };
+  $("#cpClear").onclick = ()=>{ customPick=[]; renderCustomGrid(); renderSetPreview(); };
+  $("#cpRandom").onclick = ()=>{
+    customPick = shuffle(ALL_KINGDOM.slice()).slice(0,10);
+    renderCustomGrid(); renderSetPreview();
+  };
+  $("#cpSave").onclick = ()=>{
+    if(customPick.length!==10){ flashMsg("要先選滿 10 張才能存成我的最愛"); return; }
+    const nm=($("#cpName").value||"").trim() || `我的最愛 ${FAVS.length+1}`;
+    FAVS.push({n:nm.slice(0,10), cards:customPick.slice()});
+    $("#cpName").value="";
+    cfg.setId = "fav"+(FAVS.length-1);
+    $("#customPanel").style.display="none";
+    renderSetChips();
+    flashMsg(`已收藏「${nm}」`);
+  };
+
   $("#startBtn").onclick = ()=>{
+    const cards = setCardsOf(cfg.setId);
+    if(cards.length!==10){ flashMsg("自訂牌組需要剛好 10 張，目前 "+cards.length+" 張"); return; }
+    cfg.kingdom = cards;
+    cfg.setName = setNameOf(cfg.setId);
     cfg.name = ($("#nameInput").value||"領主").slice(0,8);
     cfg.first = cfg.firstMode==="rand" ? (Math.random()*cfg.count)|0 : 0;
     $("#startWrap").style.display="none";
@@ -2188,18 +3059,27 @@ function bindStart(){
     render();
     setTimeout(()=>gameLoop(),260);
   };
+
   renderAiSetup();
+  renderSetChips();
+}
+
+function flashMsg(t){
+  const el=$("#startMsg");
+  el.textContent=t; el.classList.add("on");
+  clearTimeout(flashMsg._t);
+  flashMsg._t=setTimeout(()=>el.classList.remove("on"),2400);
 }
 
 function bindGame(){
-  $("#aiSpeed").oninput = e=>{
-    const seconds=Number(e.target.value);
-    aiReactionSeconds=Number.isFinite(seconds)?Math.min(2,Math.max(0.5,seconds)):1.5;
-    const label=aiReactionSeconds.toFixed(1)+" 秒";
-    $("#aiSpeedValue").textContent=label;
-    e.target.setAttribute("aria-valuetext",label);
+  const aiSpeed=$("#aiSpeed");
+  const syncAiSpeed=()=>{
+    G.aiDelay=Math.round(Number(aiSpeed.value)*1000);
+    $("#aiSpeedVal").textContent=(G.aiDelay/1000).toFixed(1)+" 秒";
   };
-  // 手牌點擊
+  aiSpeed.addEventListener("input",syncAiSpeed);
+  syncAiSpeed();
+
   $("#handCards").onclick = e=>{
     if(!pending || pending.kind!=="hand") return;
     const c=e.target.closest(".card"); if(!c) return;
@@ -2208,7 +3088,6 @@ function bindGame(){
     if(!pending.filter(p.hand[ix],ix)) return;
     finishPick(ix);
   };
-  // 供應區點擊
   $("#center").onclick = e=>{
     if(!pending || pending.kind!=="supply") return;
     const c=e.target.closest(".card"); if(!c) return;
@@ -2216,16 +3095,13 @@ function bindGame(){
     if(!pending.filter(id)) return;
     finishPick(id);
   };
-  // 主要按鈕
   $("#mainBtn").onclick = ()=>{
     if(G.over){ $("#startWrap").style.display="flex"; return; }
     if(pending) finishPick(null);
   };
   $("#altBtn").onclick = ()=>{ if(G.players[0]) showPileDialog(G.players[0]); };
-  // 手機記錄面板
   $("#openLogBtn").onclick = ()=>{ $("#logPanel").classList.add("show"); $("#closeLogBtn").style.display="block"; renderLog(); };
   $("#closeLogBtn").onclick = ()=>{ $("#logPanel").classList.remove("show"); };
-  // 供應區懸停說明（桌面）
   window.addEventListener("resize",()=>{ if(!G.over) render(); });
 }
 
